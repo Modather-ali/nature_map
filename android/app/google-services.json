@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "786313447580",
+    "project_id": "nature-map-53e8a",
+    "storage_bucket": "nature-map-53e8a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786313447580:android:497196f0f8ec333a070559",
+        "android_client_info": {
+          "package_name": "com.example.nature_map"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "786313447580-8p6a5k9qcdtcnhi7v4s5666lsareopv3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nature_map",
+            "certificate_hash": "3fe4094910e6d243feed7d79f09e8b4fa61fa4ef"
+          }
+        },
+        {
+          "client_id": "786313447580-hjjmm48fcvcn9g79c67liouq3i1pvak3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr4HzATpN-w4OESoObyDcdKsV5XGX258E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "786313447580-hjjmm48fcvcn9g79c67liouq3i1pvak3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

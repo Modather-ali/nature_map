@@ -30,7 +30,7 @@ class _DetectLocationState extends State<DetectLocation> {
     _placemark =
         await placemarkFromCoordinates(_position.latitude, _position.longitude);
     _cameraPosition = CameraPosition(
-        target: LatLng(_position.latitude, _position.longitude), zoom: 20);
+        target: LatLng(_position.latitude, _position.longitude), zoom: 14);
     setState(() {});
   }
 
@@ -46,9 +46,9 @@ class _DetectLocationState extends State<DetectLocation> {
     double width = MediaQuery.of(context).size.width;
 
     if (_position == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Padding(
-          padding: const EdgeInsets.all(64),
+          padding: EdgeInsets.all(64),
           child: Center(
             child: LoadingIndicator(
               indicatorType: Indicator.ballScaleMultiple,
@@ -70,7 +70,7 @@ class _DetectLocationState extends State<DetectLocation> {
             builder: (context, providerValue, child) {
           Set<Marker> markers = {
             Marker(
-              markerId: MarkerId("Land"),
+              markerId: const MarkerId("Land"),
               position: LatLng(_position.latitude, _position.longitude),
               draggable: true,
               onDragEnd: (LatLng latLng) async {
@@ -91,7 +91,7 @@ class _DetectLocationState extends State<DetectLocation> {
           _textEditingController2 =
               TextEditingController(text: providerValue.long.toString());
           return ListView(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               Row(
                 children: [
@@ -159,9 +159,12 @@ class _DetectLocationState extends State<DetectLocation> {
                     child: ElevatedButton(
                         onPressed: () {
                           providerValue.isLocate = true;
+                          providerValue.lat = _cameraPosition.target.latitude;
+                          providerValue.long = _cameraPosition.target.longitude;
                           Navigator.pop(context);
+                          setState(() {});
                         },
-                        child: Text('Save')),
+                        child: const Text('Save')),
                   )
                 ],
               )
@@ -178,7 +181,7 @@ class _DetectLocationState extends State<DetectLocation> {
       required TextEditingController controller,
       Function(String)? onChanged}) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
       width: width * 0.45,
       height: 60,
       child: TextFormField(

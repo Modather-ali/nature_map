@@ -8,6 +8,7 @@ import 'package:nature_map/frontend/landscapes_management/detect_location.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
+import 'package:timer_builder/timer_builder.dart';
 
 class AddLandscape extends StatefulWidget {
   const AddLandscape({Key? key}) : super(key: key);
@@ -29,12 +30,13 @@ class _AddLandscapeState extends State<AddLandscape> {
   final List<String> landTags1 = ["Mountain", "Sea", "Desert"];
   final List<String> landTags2 = ["Volcano", "Forest", "Civilization"];
 
+  List<String> landImages = [];
+
   _getPlacemark(latitude, longitude) async {
     _placemark = await placemarkFromCoordinates(latitude, longitude);
-    setState(() {
-      _cameraPosition =
-          CameraPosition(target: LatLng(latitude, longitude), zoom: 20);
-    });
+    _cameraPosition =
+        CameraPosition(target: LatLng(latitude, longitude), zoom: 20);
+    setState(() {});
   }
 
   @override
@@ -42,60 +44,65 @@ class _AddLandscapeState extends State<AddLandscape> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "New Landscape",
-            style:
-                appTheme().textTheme.headline3!.copyWith(color: Colors.white),
-          ),
+      appBar: AppBar(
+        title: Text(
+          "New Landscape",
+          style: appTheme().textTheme.headline3!.copyWith(color: Colors.white),
         ),
-        body: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-          children: [
-            Text(
-              "Landscape Name:",
-              style:
-                  appTheme().textTheme.headline4!.copyWith(color: Colors.black),
-            ),
-            TextFormField(
-              key: _textKey,
-              validator: (text) {
-                if (text!.isEmpty) {
-                  return "This Field can't be empty";
-                }
-                return null;
-              },
-              controller: _textEditingController,
-              maxLength: 20,
-              decoration: InputDecoration(
-                focusedBorder: const OutlineInputBorder(),
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(width: 0.3, color: Colors.grey),
-                ),
-                hintText: "Press here...",
-                hintStyle: appTheme().textTheme.headline4,
+      ),
+      body: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+        children: [
+          Text(
+            "Landscape Name:",
+            style:
+                appTheme().textTheme.headline4!.copyWith(color: Colors.black),
+          ),
+          TextFormField(
+            key: _textKey,
+            validator: (text) {
+              if (text!.isEmpty) {
+                return "This Field can't be empty";
+              }
+              return null;
+            },
+            controller: _textEditingController,
+            maxLength: 20,
+            decoration: InputDecoration(
+              focusedBorder: const OutlineInputBorder(),
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(width: 0.3, color: Colors.grey),
               ),
+              hintText: "Press here...",
+              hintStyle: appTheme().textTheme.headline4,
             ),
-            _choiceImages(),
-            Consumer<LandscapeProvider>(
-                builder: (context, providerValue, child) {
+          ),
+          Text(
+            "Add images:",
+            style:
+                appTheme().textTheme.headline4!.copyWith(color: Colors.black),
+          ),
+          _choiceImages(),
+          Consumer<LandscapeProvider>(
+            builder: (context, providerValue, child) {
               Set<Marker> markers = {
                 Marker(
-                    markerId: const MarkerId("Land"),
-                    position: LatLng(providerValue.lat, providerValue.long),
-                    infoWindow: InfoWindow(
-                        title: "Edit",
-                        onTap: () {
-                          debugPrint("Edit land Location...");
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const DetectLocation(),
-                            ),
-                          );
-                        })),
+                  markerId: const MarkerId("Land"),
+                  position: LatLng(providerValue.lat, providerValue.long),
+                  infoWindow: InfoWindow(
+                    title: "Edit",
+                    onTap: () {
+                      debugPrint("Edit land Location...");
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const DetectLocation(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               };
-              _getPlacemark(providerValue.lat, providerValue.long);
 
               return Column(
                 children: [
@@ -156,26 +163,35 @@ class _AddLandscapeState extends State<AddLandscape> {
                         Text("Civilization"),
                       ],
                       isSelected: _selections2),
-                  providerValue.isLocate
-                      ? _googleMap(markers, width, providerValue)
-                      : TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const DetectLocation(),
-                              ),
-                            );
-                          },
-                          child: const Text("Detect Location")),
+                  TimerBuilder.periodic(const Duration(seconds: 1),
+                      builder: (context) {
+                    _getPlacemark(providerValue.lat, providerValue.long);
+
+                    if (providerValue.isLocate) {
+                      return _googleMap(markers, width, providerValue);
+                    } else {
+                      return TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const DetectLocation(),
+                            ),
+                          );
+                        },
+                        child: const Text("Detect Location"),
+                      );
+                    }
+                  }),
                 ],
               );
-            }),
-          ],
-        ));
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _choiceImages() {
-    setState(() {});
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 15),
       height: 150,
@@ -266,16 +282,11 @@ class _AddLandscapeState extends State<AddLandscape> {
   Widget _googleMap(
       Set<Marker> markers, double width, LandscapeProvider providerValue) {
     if (_cameraPosition == null) {
-      return const Scaffold(
-        body: Padding(
-          padding: EdgeInsets.all(64),
-          child: Center(
-            child: LoadingIndicator(
-              indicatorType: Indicator.ballScaleMultiple,
-              colors: kDefaultRainbowColors,
-              strokeWidth: 4.0,
-            ),
-          ),
+      return const Center(
+        child: LoadingIndicator(
+          indicatorType: Indicator.ballScaleMultiple,
+          colors: kDefaultRainbowColors,
+          strokeWidth: 4.0,
         ),
       );
     } else {

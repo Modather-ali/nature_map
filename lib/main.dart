@@ -9,8 +9,6 @@ import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:animations/animations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

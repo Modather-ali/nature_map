@@ -23,22 +23,6 @@ class LandscapeProvider extends ChangeNotifier {
   ];
   List<String> landTags = [];
 
-  late CameraPosition cameraPosition;
-  late List<Placemark> placemark;
-  late Position position;
-
-  getCurrentPosition() async {
-    position = await Geolocator.getCurrentPosition();
-    debugPrint("lat:${position.latitude}\nlong: ${position.longitude}");
-    placemark =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    cameraPosition = CameraPosition(
-        target: LatLng(position.latitude, position.longitude), zoom: 20);
-    lat = position.latitude;
-    long = position.longitude;
-    notifyListeners();
-  }
-
   addNewLandscape() {
     landscapesListItem.add(Landscape(
       landName: landName,

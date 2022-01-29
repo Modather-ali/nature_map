@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
@@ -19,9 +20,23 @@ class _DetectLocationState extends State<DetectLocation> {
   late TextEditingController _textEditingController1;
   late TextEditingController _textEditingController2;
 
+  late CameraPosition _cameraPosition;
+  List<Placemark> _placemark = [];
+  var _position;
+
+  _getCurrentPosition() async {
+    _position = await Geolocator.getCurrentPosition();
+    debugPrint("lat:${_position.latitude}\nlong: ${_position.longitude}");
+    _placemark =
+        await placemarkFromCoordinates(_position.latitude, _position.longitude);
+    _cameraPosition = CameraPosition(
+        target: LatLng(_position.latitude, _position.longitude), zoom: 20);
+    setState(() {});
+  }
+
   @override
   void initState() {
-    // _getCurrentPosition();
+    _getCurrentPosition();
     super.initState();
   }
 
@@ -30,6 +45,25 @@ class _DetectLocationState extends State<DetectLocation> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
+    if (_position == null) {
+      return Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(64),
+          child: Center(
+            child: LoadingIndicator(
+              indicatorType: Indicator.ballScaleMultiple,
+              colors: kDefaultRainbowColors,
+              strokeWidth: 4.0,
+            ),
+          ),
+        ),
+      );
+    } else {
+      return _widget(height, width);
+    }
+  }
+
+  Widget _widget(double height, double width) {
     return SafeArea(
       child: Scaffold(
         body: Consumer<LandscapeProvider>(
@@ -37,17 +71,17 @@ class _DetectLocationState extends State<DetectLocation> {
           Set<Marker> markers = {
             Marker(
               markerId: MarkerId("Land"),
-              position: LatLng(providerValue.position.latitude,
-                  providerValue.position.longitude),
+              position: LatLng(_position.latitude, _position.longitude),
               draggable: true,
-              onDrag: (LatLng latLng) async {
+              onDragEnd: (LatLng latLng) async {
                 providerValue.lat = latLng.latitude;
                 providerValue.long = latLng.longitude;
-                providerValue.placemark = await placemarkFromCoordinates(
+                _placemark = await placemarkFromCoordinates(
                     latLng.latitude, latLng.longitude);
-                providerValue.cameraPosition = CameraPosition(
+                _cameraPosition = CameraPosition(
                     target: LatLng(latLng.latitude, latLng.longitude),
                     zoom: 20);
+                setState(() {});
                 debugPrint("$latLng");
               },
             ),
@@ -62,14 +96,19 @@ class _DetectLocationState extends State<DetectLocation> {
               Row(
                 children: [
                   _textField(
-                    labelText: "Latitude",
-                    width: width,
-                    controller: _textEditingController1,
-                  ),
+                      labelText: "Latitude",
+                      width: width,
+                      controller: _textEditingController1,
+                      onChanged: (text) {
+                        providerValue.lat = text as double;
+                      }),
                   _textField(
                       labelText: "Longitude",
                       width: width,
-                      controller: _textEditingController2),
+                      controller: _textEditingController2,
+                      onChanged: (text) {
+                        providerValue.long = text as double;
+                      }),
                 ],
               ),
               Padding(
@@ -79,7 +118,7 @@ class _DetectLocationState extends State<DetectLocation> {
                     SizedBox(
                       width: width * 0.45,
                       child: Text(
-                        "The Conntry: ${providerValue.placemark[0].country}",
+                        "The Conntry: ${_placemark[0].country}",
                         style: appTheme()
                             .textTheme
                             .headline3!
@@ -89,7 +128,7 @@ class _DetectLocationState extends State<DetectLocation> {
                     SizedBox(
                       width: width * 0.45,
                       child: Text(
-                        "The Region: ${providerValue.placemark[0].locality}",
+                        "The Region: ${_placemark[0].locality}",
                         style: appTheme()
                             .textTheme
                             .headline3!
@@ -114,7 +153,7 @@ class _DetectLocationState extends State<DetectLocation> {
                       child: GoogleMap(
                           markers: markers,
                           mapType: MapType.hybrid,
-                          initialCameraPosition: providerValue.cameraPosition)),
+                          initialCameraPosition: _cameraPosition)),
                   Padding(
                     padding: const EdgeInsets.only(right: 15, top: 5),
                     child: ElevatedButton(
@@ -136,7 +175,8 @@ class _DetectLocationState extends State<DetectLocation> {
   _textField(
       {required String labelText,
       required double width,
-      required TextEditingController controller}) {
+      required TextEditingController controller,
+      Function(String)? onChanged}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15, horizontal: 8),
       width: width * 0.45,
@@ -152,6 +192,7 @@ class _DetectLocationState extends State<DetectLocation> {
           labelText: labelText,
           hintStyle: appTheme().textTheme.headline4,
         ),
+        onChanged: onChanged,
       ),
     );
   }

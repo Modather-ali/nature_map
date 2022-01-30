@@ -277,7 +277,7 @@ class _UserProfileState extends State<UserProfile> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Image.asset(
+                child: Image.file(
                   landscape.landImages[0],
                   fit: BoxFit.fill,
                 )),

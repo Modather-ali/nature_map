@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/detect_location.dart';
@@ -30,12 +33,10 @@ class _AddLandscapeState extends State<AddLandscape> {
   final List<String> landTags1 = ["Mountain", "Sea", "Desert"];
   final List<String> landTags2 = ["Volcano", "Forest", "Civilization"];
 
-  List<String> landImages = [];
-
   _getPlacemark(latitude, longitude) async {
     _placemark = await placemarkFromCoordinates(latitude, longitude);
     _cameraPosition =
-        CameraPosition(target: LatLng(latitude, longitude), zoom: 20);
+        CameraPosition(target: LatLng(latitude, longitude), zoom: 14);
     setState(() {});
   }
 
@@ -83,7 +84,6 @@ class _AddLandscapeState extends State<AddLandscape> {
             style:
                 appTheme().textTheme.headline4!.copyWith(color: Colors.black),
           ),
-          _choiceImages(),
           Consumer<LandscapeProvider>(
             builder: (context, providerValue, child) {
               Set<Marker> markers = {
@@ -106,6 +106,11 @@ class _AddLandscapeState extends State<AddLandscape> {
 
               return Column(
                 children: [
+                  TimerBuilder.periodic(
+                    Duration(seconds: 1),
+                    builder: (context) =>
+                        _selectedImages(landImages: providerValue.landImages),
+                  ),
                   Text(
                     "Tags:",
                     style: appTheme()
@@ -191,91 +196,142 @@ class _AddLandscapeState extends State<AddLandscape> {
     );
   }
 
-  Widget _choiceImages() {
+  Widget _selectedImages({required List<File> landImages}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 15),
       height: 150,
       width: double.infinity,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            DottedBorder(
-                radius: const Radius.circular(10),
-                borderType: BorderType.RRect,
-                strokeCap: StrokeCap.round,
-                dashPattern: [10, 10],
-                color: Colors.grey,
-                child: InkWell(
-                  onTap: () {
-                    print("Adding new landscape...");
-
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            alignment: Alignment.center,
-                            height: 200,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: () {},
-                                      child: const Icon(
-                                          Icons.add_a_photo_outlined),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      "From Camera",
-                                      style: appTheme()
-                                          .textTheme
-                                          .headline3!
-                                          .copyWith(fontSize: 14),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: () {},
-                                      child: const Icon(Icons.image_outlined),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      "From Camera",
-                                      style: appTheme()
-                                          .textTheme
-                                          .headline3!
-                                          .copyWith(fontSize: 14),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        });
-                  },
-                  child: const SizedBox(
-                    height: 120,
-                    width: 100,
-                    child: Icon(
-                      Icons.add,
-                      size: 35,
-                      color: Colors.grey,
-                    ),
-                  ),
-                )),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ...[
+                for (File item in landImages)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.file(item),
+                  )
+              ],
+              _selectImages(landImages: landImages),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _selectImages({required List<File> landImages}) {
+    return DottedBorder(
+      radius: const Radius.circular(10),
+      borderType: BorderType.RRect,
+      strokeCap: StrokeCap.round,
+      dashPattern: [10, 10],
+      color: Colors.grey,
+      child: InkWell(
+        onTap: () {
+          debugPrint("Adding new landscape...");
+
+          showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return Container(
+                  alignment: Alignment.center,
+                  height: 200,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FloatingActionButton(
+                            onPressed: () async {
+                              final XFile? _selectedImage =
+                                  await ImagePicker().pickImage(
+                                source: ImageSource.gallery,
+                                imageQuality: 1,
+                              );
+                              if (_selectedImage != null) {
+                                Navigator.pop(context);
+                                landImages.add(File(_selectedImage.path));
+                              }
+                            },
+                            child: const Icon(Icons.add_a_photo_outlined),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "From Gallery",
+                            style: appTheme()
+                                .textTheme
+                                .headline3!
+                                .copyWith(fontSize: 14),
+                          )
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FloatingActionButton(
+                            onPressed: () {},
+                            child: const Icon(Icons.image_outlined),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "From Camera",
+                            style: appTheme()
+                                .textTheme
+                                .headline3!
+                                .copyWith(fontSize: 14),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              });
+        },
+        child: const SizedBox(
+          height: 120,
+          width: 100,
+          child: Icon(
+            Icons.add,
+            size: 35,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _choiceImageButton({required List<File> landImages}) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        FloatingActionButton(
+          onPressed: () async {
+            final XFile? _selectedImage = await ImagePicker().pickImage(
+              source: ImageSource.gallery,
+              imageQuality: 1,
+            );
+            if (_selectedImage != null) {
+              landImages.add(File(_selectedImage.path));
+            }
+          },
+          child: const Icon(Icons.add_a_photo_outlined),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Text(
+          "From Gallery",
+          style: appTheme().textTheme.headline3!.copyWith(fontSize: 14),
+        )
+      ],
     );
   }
 
@@ -356,6 +412,7 @@ class _AddLandscapeState extends State<AddLandscape> {
                     providerValue.isLocate = false;
                     providerValue.landName = '';
                     providerValue.landTags = [];
+                    providerValue.landImages = [];
                     Navigator.pop(context);
                   } catch (e) {
                     debugPrint("Error in adding new land: $e");

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:nature_map/methods/landscape.dart';
 
@@ -9,7 +11,7 @@ class LandscapeProvider extends ChangeNotifier {
 
   String landName = '';
 
-  List<String> landImages = [];
+  List<File> landImages = [];
   List<String> landTags = [];
 
   addNewLandscape() {

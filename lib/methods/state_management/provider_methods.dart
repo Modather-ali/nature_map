@@ -11,7 +11,7 @@ class LandscapeProvider extends ChangeNotifier {
 
   String landName = '';
 
-  List<File> landImages = [];
+  List<File> landImagesList = [];
   List<String> landTags = [];
 
   addNewLandscape() {
@@ -19,7 +19,7 @@ class LandscapeProvider extends ChangeNotifier {
       landName: landName,
       lat: lat,
       long: long,
-      landImages: landImages,
+      landImages: landImagesList,
       tages: landTags,
     ));
     notifyListeners();

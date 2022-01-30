@@ -273,17 +273,19 @@ class _UserProfileState extends State<UserProfile> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Image.file(
-                  landscape.landImages[0],
-                  fit: BoxFit.fill,
-                )),
+            Image.file(
+              landscape.landImages[0],
+              height:
+                  MediaQuery.of(context).orientation == Orientation.landscape
+                      ? MediaQuery.of(context).size.width * 0.2
+                      : MediaQuery.of(context).size.height * 0.1,
+              fit: BoxFit.fitWidth,
+            ),
             Text(
               landscape.landName,
-              style: appTheme().textTheme.headline3!.copyWith(fontSize: 14),
+              style: landscape.landName.length > 12
+                  ? appTheme().textTheme.headline3!.copyWith(fontSize: 10)
+                  : appTheme().textTheme.headline3!.copyWith(fontSize: 14),
             ),
             Row(
               children: [
@@ -296,8 +298,10 @@ class _UserProfileState extends State<UserProfile> {
             ),
             SizedBox(
               width: double.maxFinite,
-              child:
-                  ElevatedButton(onPressed: () {}, child: const Text("View")),
+              child: ElevatedButton(
+                onPressed: () {},
+                child: const Text("View"),
+              ),
             )
           ],
         ),

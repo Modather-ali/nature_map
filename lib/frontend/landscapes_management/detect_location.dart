@@ -73,6 +73,7 @@ class _DetectLocationState extends State<DetectLocation> {
               markerId: const MarkerId("Land"),
               position: LatLng(_position.latitude, _position.longitude),
               draggable: true,
+              infoWindow: const InfoWindow(title: "Touch and hold to move"),
               onDragEnd: (LatLng latLng) async {
                 providerValue.lat = latLng.latitude;
                 providerValue.long = latLng.longitude;

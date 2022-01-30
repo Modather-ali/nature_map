@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class FirebaseDatabase {
   String collectionPath = "Users";
@@ -22,10 +23,12 @@ class FirebaseDatabase {
           "added_landscapes": '-',
         });
       } else if (documentReference.id.isEmpty) {
-        print("this user alredy registred");
+        debugPrint("this user alredy registred");
       }
     } catch (e) {
-      print("Error in register new user: $e");
+      debugPrint("Error in register new user: $e");
     }
   }
+
+  addNewLandscape() {}
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -10,6 +11,7 @@ import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/detect_location.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:timer_builder/timer_builder.dart';
 
@@ -38,6 +40,36 @@ class _AddLandscapeState extends State<AddLandscape> {
     _cameraPosition =
         CameraPosition(target: LatLng(latitude, longitude), zoom: 14);
     setState(() {});
+  }
+
+  Future<Position> _checkPermission() async {
+    await Permission.storage.request();
+    // bool serviceEnabled;
+    LocationPermission permission;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
+
+  @override
+  void initState() {
+    _checkPermission();
+    super.initState();
   }
 
   @override
@@ -108,8 +140,8 @@ class _AddLandscapeState extends State<AddLandscape> {
                 children: [
                   TimerBuilder.periodic(
                     Duration(seconds: 1),
-                    builder: (context) =>
-                        _selectedImages(landImages: providerValue.landImages),
+                    builder: (context) => _selectedImages(
+                        landImages: providerValue.landImagesList),
                   ),
                   Text(
                     "Tags:",
@@ -242,54 +274,16 @@ class _AddLandscapeState extends State<AddLandscape> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          FloatingActionButton(
-                            onPressed: () async {
-                              final XFile? _selectedImage =
-                                  await ImagePicker().pickImage(
-                                source: ImageSource.gallery,
-                                imageQuality: 1,
-                              );
-                              if (_selectedImage != null) {
-                                Navigator.pop(context);
-                                landImages.add(File(_selectedImage.path));
-                              }
-                            },
-                            child: const Icon(Icons.add_a_photo_outlined),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "From Gallery",
-                            style: appTheme()
-                                .textTheme
-                                .headline3!
-                                .copyWith(fontSize: 14),
-                          )
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          FloatingActionButton(
-                            onPressed: () {},
-                            child: const Icon(Icons.image_outlined),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "From Camera",
-                            style: appTheme()
-                                .textTheme
-                                .headline3!
-                                .copyWith(fontSize: 14),
-                          )
-                        ],
-                      ),
+                      _choiceImageButton(
+                          landImages: landImages,
+                          source: "From Gallery",
+                          imageSource: ImageSource.gallery,
+                          iconData: Icons.add_a_photo_outlined),
+                      _choiceImageButton(
+                          landImages: landImages,
+                          source: "From Camera",
+                          imageSource: ImageSource.camera,
+                          iconData: Icons.image_outlined),
                     ],
                   ),
                 );
@@ -308,27 +302,36 @@ class _AddLandscapeState extends State<AddLandscape> {
     );
   }
 
-  Widget _choiceImageButton({required List<File> landImages}) {
+  Widget _choiceImageButton(
+      {required List<File> landImages,
+      required String source,
+      required ImageSource imageSource,
+      required IconData iconData}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FloatingActionButton(
           onPressed: () async {
-            final XFile? _selectedImage = await ImagePicker().pickImage(
-              source: ImageSource.gallery,
-              imageQuality: 1,
-            );
-            if (_selectedImage != null) {
-              landImages.add(File(_selectedImage.path));
+            try {
+              final XFile? _selectedImage = await ImagePicker().pickImage(
+                source: imageSource,
+                imageQuality: 1,
+              );
+              if (_selectedImage != null) {
+                Navigator.pop(context);
+                landImages.add(File(_selectedImage.path));
+              }
+            } catch (e) {
+              debugPrint("error in choice image: $e");
             }
           },
-          child: const Icon(Icons.add_a_photo_outlined),
+          child: Icon(iconData),
         ),
         const SizedBox(
           height: 10,
         ),
         Text(
-          "From Gallery",
+          source,
           style: appTheme().textTheme.headline3!.copyWith(fontSize: 14),
         )
       ],
@@ -412,7 +415,7 @@ class _AddLandscapeState extends State<AddLandscape> {
                     providerValue.isLocate = false;
                     providerValue.landName = '';
                     providerValue.landTags = [];
-                    providerValue.landImages = [];
+                    providerValue.landImagesList = [];
                     Navigator.pop(context);
                   } catch (e) {
                     debugPrint("Error in adding new land: $e");

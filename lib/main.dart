@@ -9,6 +9,7 @@ import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,13 +47,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
+  Future<Position> _checkPermission() async {
+    //  await Permission.storage.request();
+
+    // bool serviceEnabled;
     LocationPermission permission;
 
     // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {}
+    // serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {}
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -75,7 +78,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _determinePosition();
+    _checkPermission();
     super.initState();
   }
 

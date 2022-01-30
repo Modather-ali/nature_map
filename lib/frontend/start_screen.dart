@@ -45,7 +45,7 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   Widget _startScreenUI(_scaffoldKey) {
-    if (connectivityResult == ConnectivityResult.wifi) {
+    if (connectivityResult == ConnectivityResult.none) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

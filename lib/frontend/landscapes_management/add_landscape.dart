@@ -26,6 +26,8 @@ class _AddLandscapeState extends State<AddLandscape> {
   final TextEditingController _textEditingController = TextEditingController();
   final GlobalKey<FormState> _textKey = GlobalKey<FormState>();
 
+  bool isLoading = false;
+
   var _cameraPosition;
   late List<Placemark> _placemark;
 
@@ -83,146 +85,155 @@ class _AddLandscapeState extends State<AddLandscape> {
           style: appTheme().textTheme.headline3!.copyWith(color: Colors.white),
         ),
       ),
-      body: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+      body: Stack(
         children: [
-          Text(
-            "Landscape Name:",
-            style:
-                appTheme().textTheme.headline4!.copyWith(color: Colors.black),
-          ),
-          TextFormField(
-            key: _textKey,
-            validator: (text) {
-              if (text!.isEmpty) {
-                return "This Field can't be empty";
-              }
-              return null;
-            },
-            controller: _textEditingController,
-            maxLength: 20,
-            decoration: InputDecoration(
-              focusedBorder: const OutlineInputBorder(),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(width: 0.3, color: Colors.grey),
+          ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+            children: [
+              Text(
+                "Landscape Name:",
+                style: appTheme()
+                    .textTheme
+                    .headline4!
+                    .copyWith(color: Colors.black),
               ),
-              hintText: "Press here...",
-              hintStyle: appTheme().textTheme.headline4,
-            ),
-          ),
-          Text(
-            "Add images:",
-            style:
-                appTheme().textTheme.headline4!.copyWith(color: Colors.black),
-          ),
-          Consumer<LandscapeProvider>(
-            builder: (context, providerValue, child) {
-              Set<Marker> markers = {
-                Marker(
-                  markerId: const MarkerId("Land"),
-                  position: LatLng(providerValue.lat, providerValue.long),
-                  infoWindow: InfoWindow(
-                    title: "Edit",
-                    onTap: () {
-                      debugPrint("Edit land Location...");
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const DetectLocation(),
-                        ),
-                      );
-                    },
+              TextFormField(
+                key: _textKey,
+                validator: (text) {
+                  if (text!.isEmpty) {
+                    return "This Field can't be empty";
+                  }
+                  return null;
+                },
+                controller: _textEditingController,
+                maxLength: 20,
+                decoration: InputDecoration(
+                  focusedBorder: const OutlineInputBorder(),
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(width: 0.3, color: Colors.grey),
                   ),
+                  hintText: "Press here...",
+                  hintStyle: appTheme().textTheme.headline4,
                 ),
-              };
-
-              return Column(
-                children: [
-                  TimerBuilder.periodic(
-                    Duration(seconds: 1),
-                    builder: (context) => _selectedImages(
-                        landImages: providerValue.landImagesList),
-                  ),
-                  Text(
-                    "Tags:",
-                    style: appTheme()
-                        .textTheme
-                        .headline4!
-                        .copyWith(color: Colors.black),
-                  ),
-                  ToggleButtons(
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width / 3.5,
-                        minHeight: 50,
-                      ),
-                      onPressed: (index) {
-                        setState(() {
-                          _selections1[index] = !_selections1[index];
-                        });
-                        if (_selections1[index]) {
-                          providerValue.landTags.add(landTags1[index]);
-                        } else {
-                          providerValue.landTags.remove(landTags1[index]);
-                        }
-                        debugPrint('${providerValue.landTags}');
-                      },
-                      selectedColor: Colors.black,
-                      selectedBorderColor: Colors.green,
-                      color: Colors.grey,
-                      children: const [
-                        Text("Mountain"),
-                        Text("Sea"),
-                        Text("Desert"),
-                      ],
-                      isSelected: _selections1),
-                  ToggleButtons(
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width / 3.5,
-                        minHeight: 50,
-                      ),
-                      onPressed: (index) {
-                        setState(() {
-                          _selections2[index] = !_selections2[index];
-                        });
-                        if (_selections2[index]) {
-                          providerValue.landTags.add(landTags2[index]);
-                        } else {
-                          providerValue.landTags.remove(landTags2[index]);
-                        }
-                        print(providerValue.landTags);
-                      },
-                      selectedColor: Colors.black,
-                      selectedBorderColor: Colors.green,
-                      color: Colors.grey,
-                      children: const [
-                        Text("Volcano"),
-                        Text("Forest"),
-                        Text("Civilization"),
-                      ],
-                      isSelected: _selections2),
-                  TimerBuilder.periodic(const Duration(seconds: 1),
-                      builder: (context) {
-                    _getPlacemark(providerValue.lat, providerValue.long);
-
-                    if (providerValue.isLocate) {
-                      return _googleMap(markers, width, providerValue);
-                    } else {
-                      return TextButton(
-                        onPressed: () {
+              ),
+              Text(
+                "Add images:",
+                style: appTheme()
+                    .textTheme
+                    .headline4!
+                    .copyWith(color: Colors.black),
+              ),
+              Consumer<LandscapeProvider>(
+                builder: (context, providerValue, child) {
+                  Set<Marker> markers = {
+                    Marker(
+                      markerId: const MarkerId("Land"),
+                      position: LatLng(providerValue.lat, providerValue.long),
+                      infoWindow: InfoWindow(
+                        title: "Edit",
+                        onTap: () {
+                          debugPrint("Edit land Location...");
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const DetectLocation(),
                             ),
                           );
                         },
-                        child: const Text("Detect Location"),
-                      );
-                    }
-                  }),
-                ],
-              );
-            },
+                      ),
+                    ),
+                  };
+
+                  return Column(
+                    children: [
+                      TimerBuilder.periodic(
+                        const Duration(seconds: 1),
+                        builder: (context) => _selectedImages(
+                            landImages: providerValue.landImagesList),
+                      ),
+                      Text(
+                        "Tags:",
+                        style: appTheme()
+                            .textTheme
+                            .headline4!
+                            .copyWith(color: Colors.black),
+                      ),
+                      ToggleButtons(
+                          constraints: BoxConstraints(
+                            minWidth: MediaQuery.of(context).size.width / 3.5,
+                            minHeight: 50,
+                          ),
+                          onPressed: (index) {
+                            setState(() {
+                              _selections1[index] = !_selections1[index];
+                            });
+                            if (_selections1[index]) {
+                              providerValue.landTags.add(landTags1[index]);
+                            } else {
+                              providerValue.landTags.remove(landTags1[index]);
+                            }
+                            debugPrint('${providerValue.landTags}');
+                          },
+                          selectedColor: Colors.black,
+                          selectedBorderColor: Colors.green,
+                          color: Colors.grey,
+                          children: const [
+                            Text("Mountain"),
+                            Text("Sea"),
+                            Text("Desert"),
+                          ],
+                          isSelected: _selections1),
+                      ToggleButtons(
+                          constraints: BoxConstraints(
+                            minWidth: MediaQuery.of(context).size.width / 3.5,
+                            minHeight: 50,
+                          ),
+                          onPressed: (index) {
+                            setState(() {
+                              _selections2[index] = !_selections2[index];
+                            });
+                            if (_selections2[index]) {
+                              providerValue.landTags.add(landTags2[index]);
+                            } else {
+                              providerValue.landTags.remove(landTags2[index]);
+                            }
+                            print(providerValue.landTags);
+                          },
+                          selectedColor: Colors.black,
+                          selectedBorderColor: Colors.green,
+                          color: Colors.grey,
+                          children: const [
+                            Text("Volcano"),
+                            Text("Forest"),
+                            Text("Civilization"),
+                          ],
+                          isSelected: _selections2),
+                      TimerBuilder.periodic(const Duration(seconds: 1),
+                          builder: (context) {
+                        _getPlacemark(providerValue.lat, providerValue.long);
+
+                        if (providerValue.isLocate) {
+                          return _googleMap(markers, width, providerValue);
+                        } else {
+                          return TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const DetectLocation(),
+                                ),
+                              );
+                            },
+                            child: const Text("Detect Location"),
+                          );
+                        }
+                      }),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
+          isLoading ? _loadingData() : const SizedBox(),
         ],
       ),
     );
@@ -405,11 +416,14 @@ class _AddLandscapeState extends State<AddLandscape> {
             height: 15,
           ),
           ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_textEditingController.text.isNotEmpty) {
+                  setState(() {
+                    isLoading = true;
+                  });
                   try {
                     providerValue.landName = _textEditingController.text;
-                    providerValue.addNewLandscape();
+                    await providerValue.addNewLandToFirebase();
                     providerValue.lat = 0.0;
                     providerValue.long = 0.0;
                     providerValue.isLocate = false;
@@ -425,10 +439,28 @@ class _AddLandscapeState extends State<AddLandscape> {
                       message: "Landscape name can't be empty",
                       color: Colors.red));
                 }
+                setState(() {
+                  isLoading = false;
+                });
               },
               child: const Text("Add the Landscape"))
         ],
       );
     }
+  }
+
+  Widget _loadingData() {
+    return Container(
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(64),
+      color: Colors.black.withOpacity(0.4),
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: const LoadingIndicator(
+        indicatorType: Indicator.ballRotateChase,
+        colors: kDefaultRainbowColors,
+        strokeWidth: 3.0,
+      ),
+    );
   }
 }

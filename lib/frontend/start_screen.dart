@@ -54,11 +54,13 @@ class _StartScreenState extends State<StartScreen> {
           const SizedBox(
             height: 15,
           ),
-          ElevatedButton(
-            onPressed: () {
-              _checkConnectivity();
-            },
-            child: const Text("Reload this Page"),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                _checkConnectivity();
+              },
+              child: const Text("Reload this Page"),
+            ),
           ),
         ],
       );

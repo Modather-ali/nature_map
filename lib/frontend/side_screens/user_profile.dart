@@ -192,7 +192,8 @@ class _UserProfileState extends State<UserProfile> {
                   await firebaseDatabase.registerNewUser(
                     userEmail:
                         FirebaseAuth.instance.currentUser!.email.toString(),
-                    userName: "Modaser",
+                    userName: FirebaseAuth.instance.currentUser!.displayName
+                        .toString(),
                   );
 
                   setState(() {});

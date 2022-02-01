@@ -121,7 +121,7 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/volcano.jpg",
-                    landscapeName: "Volcanoe",
+                    landscapeName: "Volcano",
                     color: const Color(0xFFae2012),
                   ),
                 ],

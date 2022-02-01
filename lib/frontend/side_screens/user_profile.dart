@@ -1,14 +1,9 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/add_landscape.dart';
-import 'package:nature_map/frontend/landscapes_list.dart';
-import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';

@@ -97,12 +97,12 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                       context: context,
                       imagePath: "assets/images/mountain.jpg",
-                      landscapeName: "Mountains",
+                      landscapeName: "Mountain",
                       color: const Color(0xFF7f4f24)),
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/sea.jpg",
-                    landscapeName: "Seas",
+                    landscapeName: "Sea",
                     color: const Color(0xFF014f86),
                   ),
                 ],
@@ -116,12 +116,12 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                       context: context,
                       imagePath: "assets/images/desert.jpg",
-                      landscapeName: "Deserts",
+                      landscapeName: "Desert",
                       color: const Color(0xFFffba08)),
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/volcano.jpg",
-                    landscapeName: "Volcanoes",
+                    landscapeName: "Volcanoe",
                     color: const Color(0xFFae2012),
                   ),
                 ],
@@ -135,13 +135,13 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/forest.jpg",
-                    landscapeName: "Forests",
+                    landscapeName: "Forest",
                     color: const Color(0xFF2d6a4f),
                   ),
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/civilization.jpg",
-                    landscapeName: "Civilizations",
+                    landscapeName: "Civilization",
                     color: const Color(0xFF7b2cbf),
                   ),
                 ],

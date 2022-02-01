@@ -418,21 +418,35 @@ class _AddLandscapeState extends State<AddLandscape> {
           ElevatedButton(
               onPressed: () async {
                 if (_textEditingController.text.isNotEmpty) {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  try {
-                    providerValue.landName = _textEditingController.text;
-                    await providerValue.addNewLandToFirebase();
-                    providerValue.lat = 0.0;
-                    providerValue.long = 0.0;
-                    providerValue.isLocate = false;
-                    providerValue.landName = '';
-                    providerValue.landTags = [];
-                    providerValue.landImagesList = [];
-                    Navigator.pop(context);
-                  } catch (e) {
-                    debugPrint("Error in adding new land: $e");
+                  if (providerValue.landImagesList.isNotEmpty) {
+                    if (providerValue.landTags.isNotEmpty) {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      try {
+                        providerValue.landName = _textEditingController.text;
+                        await providerValue.addNewLandToFirebase();
+                        providerValue.lat = 0.0;
+                        providerValue.long = 0.0;
+                        providerValue.isLocate = false;
+                        providerValue.landName = '';
+                        providerValue.landTags = [];
+                        providerValue.landImagesList = [];
+                        Navigator.pop(context);
+                      } catch (e) {
+                        debugPrint("Error in adding new land: $e");
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                          message:
+                              "You should at least choice one tag for this landscape",
+                          color: Colors.red));
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                        message:
+                            "You should at least upload a picture of this landscape",
+                        color: Colors.red));
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(snackBar(

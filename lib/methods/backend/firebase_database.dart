@@ -82,4 +82,19 @@ class FirebaseDatabase {
       debugPrint("Error in adding new land to firbs: $e");
     }
   }
+
+  Future<List<QueryDocumentSnapshot<Object?>>> getLandscapesData(
+      {required String landTag}) async {
+    try {
+      CollectionReference collectionReference =
+          FirebaseFirestore.instance.collection(landsCollectionPath);
+      QuerySnapshot<Object?> querySnapshotn = await collectionReference
+          .where("tages", arrayContains: landTag)
+          .get();
+      return querySnapshotn.docs;
+    } catch (e) {
+      debugPrint("error when get data from firebase: $e");
+      return [];
+    }
+  }
 }

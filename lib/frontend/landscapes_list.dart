@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -31,7 +32,6 @@ class _LandscapesListState extends State<LandscapesList> {
     _landscapesDataList = await _firebaseDatabase.getLandscapesData(
         landTag: widget.landscapeName);
 
-    for (var item in _landscapesDataList) {}
     setState(() {});
   }
 
@@ -153,12 +153,24 @@ class _LandscapesListState extends State<LandscapesList> {
                         fit: BoxFit.fill,
                       ),
                     ),
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const MapScreen()));
+                    OpenContainer(
+                        transitionDuration: Duration(milliseconds: 650),
+                        closedElevation: 8,
+                        transitionType: ContainerTransitionType.fade,
+                        closedBuilder: (context, closedBuilder) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "View",
+                              style: appTheme().textTheme.headline3,
+                            ),
+                          );
                         },
-                        child: const Text("View")),
+                        openBuilder: (context, openBuilder) {
+                          return MapScreen(
+                            landscapeData: landscapeData,
+                          );
+                        })
                   ],
                 ),
               ),

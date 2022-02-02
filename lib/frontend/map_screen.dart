@@ -1,22 +1,44 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nature_map/app_theme.dart';
 
-class MapScreen extends StatelessWidget {
-  const MapScreen({Key? key}) : super(key: key);
-//double _zoom = 10.0;
+class MapScreen extends StatefulWidget {
+  final QueryDocumentSnapshot landscapeData;
+  MapScreen({Key? key, required this.landscapeData}) : super(key: key);
 
-  final CameraPosition _cameraPosition =
-      const CameraPosition(target: LatLng(15.6694253, 32.423543), zoom: 20);
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  late double latitude, longitude;
+
+  late CameraPosition _cameraPosition;
+  late List<Placemark> _placemark;
+  _getLocationData() async {
+    latitude = widget.landscapeData["lat"];
+    longitude = widget.landscapeData["long"];
+    _cameraPosition =
+        CameraPosition(target: LatLng(latitude, longitude), zoom: 15);
+    _placemark = await placemarkFromCoordinates(latitude, longitude);
+  }
+
+  @override
+  void initState() {
+    _getLocationData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     Set<Marker> markers = {
       Marker(
-        markerId: const MarkerId('value'),
-        position: const LatLng(15.6694253, 32.423543),
+        markerId: const MarkerId('landscape'),
+        position: LatLng(latitude, longitude),
         infoWindow: InfoWindow(
-          title: "My home",
+          title: widget.landscapeData["land_name"],
           onTap: () {
             showModalBottomSheet(
               context: context,
@@ -70,79 +92,60 @@ class MapScreen extends StatelessWidget {
           alignment: Alignment.topCenter,
           color: Colors.grey,
           width: double.maxFinite,
-          height: 30,
-          child: const Icon(
-            Icons.menu,
-            size: 35,
-          ),
+          height: 10,
         ),
-        Container(
-          height: MediaQuery.of(context).size.height / 4,
+        SizedBox(
+          height: MediaQuery.of(context).size.height / 4.5,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              Image.asset(
-                "assets/images/mountain.jpg",
-              ),
-              Image.asset(
-                "assets/images/sea.jpg",
-              ),
-              Image.asset(
-                "assets/images/offline.jpg",
-              ),
-              Image.asset(
-                "assets/images/volcano.jpg",
-              ),
+              ...[
+                for (String imageUrl in widget.landscapeData["land_images"])
+                  Image.network(imageUrl)
+              ]
             ],
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
+        ListView(
+          padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+          shrinkWrap: true,
+          physics: BouncingScrollPhysics(),
           children: [
-            const SizedBox(
-              width: 10,
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "landscape name",
-                  style: appTheme().textTheme.headline3,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Contery / Area",
-                  style: appTheme().textTheme.headline3,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Lat: / Lang:",
-                  style: appTheme().textTheme.headline3,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Distance 100 K/M",
-                  style: appTheme().textTheme.headline3,
-                ),
-              ],
+            SizedBox(
+              width: 180,
+              child: Text(
+                widget.landscapeData['land_name'],
+                style: appTheme().textTheme.headline3,
+              ),
             ),
             const SizedBox(
-              width: 20,
+              height: 10,
             ),
             Text(
-              "About:",
+              "Contery:",
+              style: appTheme().textTheme.headline4,
+            ),
+            Text(
+              "${_placemark[0].country}",
               style: appTheme().textTheme.headline3,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Region:",
+              style: appTheme().textTheme.headline4,
+            ),
+            Text(
+              "${_placemark[0].locality}",
+              style: appTheme().textTheme.headline3,
+            ),
+            Text(
+              "Lat: ${widget.landscapeData['lat']}\nLang: ${widget.landscapeData['long']}",
+              style: appTheme().textTheme.headline4,
+            ),
+            const SizedBox(
+              height: 10,
             ),
           ],
         )

@@ -153,40 +153,40 @@ class _UserDiscoveriesState extends State<UserDiscoveries> {
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: RoundedLoadingButton(
-            controller: _roundedLoadingButtonController,
-            color: appTheme().colorScheme.primary,
-            successColor: Colors.green,
-            errorColor: Colors.red,
-            onPressed: () async {
-              try {
-                GoogleSigninResults signinResult = await signInWithGoogle();
+          controller: _roundedLoadingButtonController,
+          color: appTheme().colorScheme.primary,
+          successColor: Colors.green,
+          errorColor: Colors.red,
+          onPressed: () async {
+            try {
+              GoogleSigninResults signinResult = await signInWithGoogle();
 
-                if (signinResult == GoogleSigninResults.alreadySignedIn) {
-                  _roundedLoadingButtonController.success();
-                  setState(() {});
-                } else if (signinResult ==
-                    GoogleSigninResults.signInCompleted) {
-                  _roundedLoadingButtonController.success();
-                  await _firebaseDatabase.registerNewUser(
-                    userEmail:
-                        FirebaseAuth.instance.currentUser!.email.toString(),
-                    userName: FirebaseAuth.instance.currentUser!.displayName
-                        .toString(),
-                  );
-
-                  setState(() {});
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar(
-                      message: "Registration Successful", color: Colors.green));
-                }
-              } catch (e) {
-                _roundedLoadingButtonController.error();
+              if (signinResult == GoogleSigninResults.alreadySignedIn) {
+                _roundedLoadingButtonController.success();
+                setState(() {});
+              } else if (signinResult == GoogleSigninResults.signInCompleted) {
+                _roundedLoadingButtonController.success();
+                await _firebaseDatabase.registerNewUser(
+                  userEmail:
+                      FirebaseAuth.instance.currentUser!.email.toString(),
+                  userName:
+                      FirebaseAuth.instance.currentUser!.displayName.toString(),
+                );
+                _getLandscapeData();
+                setState(() {});
                 ScaffoldMessenger.of(context).showSnackBar(snackBar(
-                    message: "Registration failede", color: Colors.red));
-                print(GoogleSigninResults.signInNotCompleted);
-                print("Error in register the user: $e");
+                    message: "Registration Successful", color: Colors.green));
               }
-            },
-            child: const Text("Register your account first")),
+            } catch (e) {
+              _roundedLoadingButtonController.error();
+              ScaffoldMessenger.of(context).showSnackBar(
+                  snackBar(message: "Registration failede", color: Colors.red));
+              print(GoogleSigninResults.signInNotCompleted);
+              print("Error in register the user: $e");
+            }
+          },
+          child: const Text("Register your account first"),
+        ),
       );
     } else {
       return const SizedBox();

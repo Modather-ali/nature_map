@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/discover_landscape.dart';
 import 'package:nature_map/frontend/map_screen.dart';
@@ -204,7 +205,7 @@ class _UserProfileState extends State<UserProfile> {
                     userName: FirebaseAuth.instance.currentUser!.displayName
                         .toString(),
                   );
-
+                  _getLandscapeData();
                   setState(() {});
                   ScaffoldMessenger.of(context).showSnackBar(snackBar(
                       message: "Registration Successful", color: Colors.green));

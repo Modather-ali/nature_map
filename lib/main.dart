@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:nature_map/app_theme.dart';
+import 'package:nature_map/frontend/side_screens/user_discoveries.dart';
 import 'package:nature_map/frontend/side_screens/user_profile.dart';
 import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
@@ -161,13 +162,16 @@ class MenuScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const UserDiscoveries()));
+              },
               leading: const Icon(
                 Icons.landscape_outlined,
                 color: Colors.white,
               ),
               title: Text(
-                "Activity",
+                "Discoveries",
                 style: appTheme().textTheme.headline2,
               ),
             ),

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
-import 'package:nature_map/methods/landscape.dart';
 
 class LandscapeProvider extends ChangeNotifier {
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();

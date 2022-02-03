@@ -81,7 +81,7 @@ class _AddLandscapeState extends State<AddLandscape> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "New Landscape",
+          "Discover Landscape",
           style: appTheme().textTheme.headline3!.copyWith(color: Colors.white),
         ),
       ),

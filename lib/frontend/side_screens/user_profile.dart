@@ -1,17 +1,14 @@
-import 'dart:async';
-
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nature_map/app_theme.dart';
-import 'package:nature_map/frontend/landscapes_management/add_landscape.dart';
+import 'package:nature_map/frontend/landscapes_management/discover_landscape.dart';
 import 'package:nature_map/frontend/map_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/enums.dart';
-import 'package:nature_map/methods/landscape.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:dotted_border/dotted_border.dart';
 
@@ -72,7 +69,7 @@ class _UserProfileState extends State<UserProfile> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   child: Text(
-                    "Landscapes added by you:",
+                    "landscapes discovered by you:",
                     style: appTheme().textTheme.headline4,
                   ),
                 ),
@@ -324,13 +321,6 @@ class _UserProfileState extends State<UserProfile> {
                 openBuilder: (context, openBuilder) {
                   return MapScreen(landscapeData: landscape);
                 })
-            // SizedBox(
-            //   width: double.maxFinite,
-            //   child: ElevatedButton(
-            //     onPressed: () {},
-            //     child: const Text("View"),
-            //   ),
-            // )
           ],
         ),
       ),

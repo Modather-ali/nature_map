@@ -71,7 +71,7 @@ class FirebaseDatabase {
         collectionReference.doc(userEmail + "-$randomInt");
     try {
       documentReference.set({
-        "added by": userEmail,
+        "added_by": userEmail,
         "land_name": landName,
         "lat": lat,
         "long": long,
@@ -90,6 +90,21 @@ class FirebaseDatabase {
           FirebaseFirestore.instance.collection(landsCollectionPath);
       QuerySnapshot<Object?> querySnapshotn = await collectionReference
           .where("tages", arrayContains: landTag)
+          .get();
+      return querySnapshotn.docs;
+    } catch (e) {
+      debugPrint("error when get data from firebase: $e");
+      return [];
+    }
+  }
+
+  Future<List<QueryDocumentSnapshot<Object?>>> getLandDataForThisUser(
+      {required String userEmail}) async {
+    try {
+      CollectionReference collectionReference =
+          FirebaseFirestore.instance.collection(landsCollectionPath);
+      QuerySnapshot<Object?> querySnapshotn = await collectionReference
+          .where("added by", isEqualTo: userEmail)
           .get();
       return querySnapshotn.docs;
     } catch (e) {

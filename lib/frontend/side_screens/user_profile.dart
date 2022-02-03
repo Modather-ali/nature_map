@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:animations/animations.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/add_landscape.dart';
+import 'package:nature_map/frontend/map_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
@@ -20,7 +23,8 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
-  FirebaseDatabase firebaseDatabase = FirebaseDatabase();
+  List<QueryDocumentSnapshot<Object?>> _landsapesDataList = [];
+  final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
 
   final RoundedLoadingButtonController _roundedLoadingButtonController =
       RoundedLoadingButtonController();
@@ -34,6 +38,27 @@ class _UserProfileState extends State<UserProfile> {
     }
   }
 
+  _getLandscapeData() async {
+    try {
+      if (FirebaseAuth.instance.currentUser != null) {
+        _landsapesDataList = await _firebaseDatabase.getLandDataForThisUser(
+            userEmail: FirebaseAuth.instance.currentUser!.email.toString());
+        debugPrint(_landsapesDataList.toString());
+        setState(() {});
+      } else {
+        _landsapesDataList = [];
+      }
+    } catch (e) {
+      debugPrint("Error while geting data: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    _getLandscapeData();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -41,7 +66,7 @@ class _UserProfileState extends State<UserProfile> {
         body: Stack(
           children: [
             ListView(
-              physics: PageScrollPhysics(),
+              physics: const PageScrollPhysics(),
               children: [
                 _userCard(context),
                 Padding(
@@ -110,14 +135,6 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ),
                   ),
-                  // IconButton(
-
-                  //     onPressed: () {},
-                  //     icon: Icon(
-                  //       Icons.add_a_photo_outlined,
-                  //       // color: Colors.grey,
-                  //       size: 40,
-                  //     ))
                 ],
               ),
             ],
@@ -184,7 +201,7 @@ class _UserProfileState extends State<UserProfile> {
                 } else if (signinResult ==
                     GoogleSigninResults.signInCompleted) {
                   _roundedLoadingButtonController.success();
-                  await firebaseDatabase.registerNewUser(
+                  await _firebaseDatabase.registerNewUser(
                     userEmail:
                         FirebaseAuth.instance.currentUser!.email.toString(),
                     userName: FirebaseAuth.instance.currentUser!.displayName
@@ -213,13 +230,13 @@ class _UserProfileState extends State<UserProfile> {
   Widget _addedlandscapesList() {
     return ListView(
       shrinkWrap: true,
-      physics: BouncingScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       children: [
         Wrap(
           direction: Axis.horizontal,
           children: [
             ...[
-              for (Landscape landscape in landscapesListItem)
+              for (var landscape in _landsapesDataList)
                 _landscapeCard(landscape)
             ],
             Padding(
@@ -228,7 +245,7 @@ class _UserProfileState extends State<UserProfile> {
                   radius: const Radius.circular(10),
                   borderType: BorderType.RRect,
                   strokeCap: StrokeCap.round,
-                  dashPattern: [10, 10],
+                  dashPattern: const [10, 10],
                   color: Colors.grey,
                   child: InkWell(
                     onTap: () {
@@ -256,7 +273,7 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
-  Widget _landscapeCard(Landscape landscape) {
+  Widget _landscapeCard(QueryDocumentSnapshot landscape) {
     return Card(
       elevation: 10,
       child: Container(
@@ -269,36 +286,51 @@ class _UserProfileState extends State<UserProfile> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.file(
-              landscape.landImages[0],
+            SizedBox(
               height:
                   MediaQuery.of(context).orientation == Orientation.landscape
                       ? MediaQuery.of(context).size.width * 0.2
                       : MediaQuery.of(context).size.height * 0.1,
-              fit: BoxFit.fitWidth,
+              child: Image.network(
+                landscape["land_images"][0],
+                fit: BoxFit.fitWidth,
+              ),
             ),
-            Text(
-              landscape.landName,
-              style: landscape.landName.length > 12
-                  ? appTheme().textTheme.headline3!.copyWith(fontSize: 10)
-                  : appTheme().textTheme.headline3!.copyWith(fontSize: 14),
-            ),
+            Text(landscape["land_name"],
+                style: appTheme().textTheme.headline3!.copyWith(fontSize: 11)),
             Row(
-              children: [
-                const Icon(
+              children: const [
+                Icon(
                   Icons.favorite,
                   color: Colors.red,
                 ),
-                Text(landscape.favoriteNumber.toString()),
+                Text('0'),
               ],
             ),
-            SizedBox(
-              width: double.maxFinite,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: const Text("View"),
-              ),
-            )
+            OpenContainer(
+                transitionDuration: const Duration(milliseconds: 500),
+                closedColor: const Color(0xFF52b788),
+                closedBuilder: (context, closedBuilder) {
+                  return Container(
+                    alignment: Alignment.center,
+                    height: 30,
+                    width: double.maxFinite,
+                    child: Text(
+                      "View",
+                      style: appTheme().textTheme.headline2,
+                    ),
+                  );
+                },
+                openBuilder: (context, openBuilder) {
+                  return MapScreen(landscapeData: landscape);
+                })
+            // SizedBox(
+            //   width: double.maxFinite,
+            //   child: ElevatedButton(
+            //     onPressed: () {},
+            //     child: const Text("View"),
+            //   ),
+            // )
           ],
         ),
       ),

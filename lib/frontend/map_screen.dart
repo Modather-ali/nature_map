@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 
 class MapScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class _MapScreenState extends State<MapScreen> {
   late double latitude, longitude;
 
   late CameraPosition _cameraPosition;
-  late List<Placemark> _placemark;
+  var _placemark;
   _getLocationData() async {
     latitude = widget.landscapeData["lat"];
     longitude = widget.landscapeData["long"];
@@ -43,7 +44,21 @@ class _MapScreenState extends State<MapScreen> {
             showModalBottomSheet(
               context: context,
               builder: (context) {
-                return _bottomSheet(context);
+                if (_placemark == null) {
+                  return const Center(
+                    child: SizedBox(
+                      height: 150,
+                      width: 150,
+                      child: LoadingIndicator(
+                        indicatorType: Indicator.ballRotateChase,
+                        colors: kDefaultRainbowColors,
+                        strokeWidth: 4.0,
+                      ),
+                    ),
+                  );
+                } else {
+                  return _bottomSheet(context);
+                }
               },
             );
           },
@@ -107,9 +122,9 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
         ListView(
-          padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+          padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
           shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           children: [
             SizedBox(
               width: 180,

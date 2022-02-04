@@ -25,7 +25,7 @@ class FirebaseDatabase {
           "profile_image_link": '-',
           "background_image_link": '-',
           "creation_date": currentDate,
-          "favorite_landscapes": '-',
+          "favorite_landscapes": [],
         });
       } else {
         debugPrint("this user alredy registred");
@@ -77,6 +77,7 @@ class FirebaseDatabase {
         "long": long,
         "land_images": landImagesLink,
         "tages": tags,
+        "fans": [], // this will contain all users ids that liked this landscape
       });
     } catch (e) {
       debugPrint("Error in adding new land to firbs: $e");
@@ -110,6 +111,57 @@ class FirebaseDatabase {
     } catch (e) {
       debugPrint("error when get data from firebase: $e");
       return [];
+    }
+  }
+
+  Future updateUserFavoriteLandscapes(
+      {required String userEmail,
+      required QueryDocumentSnapshot landscape}) async {
+    try {
+      DocumentReference userReference = FirebaseFirestore.instance
+          .collection(usersCollectionPath)
+          .doc(userEmail);
+
+      DocumentSnapshot userData = await userReference.get();
+
+      List favoriteLandscapes = userData["favorite_landscapes"];
+      if (favoriteLandscapes.contains(landscape.id)) {
+        favoriteLandscapes.remove(landscape.id);
+      } else {
+        favoriteLandscapes.add(landscape.id);
+      }
+      userReference.update({
+        "favorite_landscapes": favoriteLandscapes,
+      });
+      favoriteLandscapes.clear();
+    } catch (e) {
+      debugPrint("error while update users  favorite landscape: $e");
+    }
+  }
+
+  Future updateLandscapesFans(
+      {required String userEmail,
+      required QueryDocumentSnapshot landscape}) async {
+    try {
+      DocumentReference landscapeReference = FirebaseFirestore.instance
+          .collection(landsCollectionPath)
+          .doc(landscape.id);
+
+      DocumentSnapshot landscapeData = await landscapeReference.get();
+
+      List favoriteLandscapes = landscapeData["fans"];
+
+      if (favoriteLandscapes.contains(userEmail)) {
+        favoriteLandscapes.remove(userEmail);
+      } else {
+        favoriteLandscapes.add(userEmail);
+      }
+      landscapeReference.update({
+        "fans": favoriteLandscapes,
+      });
+      favoriteLandscapes.clear();
+    } catch (e) {
+      debugPrint("error while update landscape fans: $e");
     }
   }
 }

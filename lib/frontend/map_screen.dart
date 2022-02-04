@@ -63,9 +63,6 @@ class _MapScreenState extends State<MapScreen> {
             );
           },
         ),
-        onTap: () {
-          //  _zoom = 2.0;
-        },
       )
     };
 
@@ -101,7 +98,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _bottomSheet(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         Container(
           alignment: Alignment.topCenter,
@@ -110,7 +107,9 @@ class _MapScreenState extends State<MapScreen> {
           height: 10,
         ),
         SizedBox(
-          height: MediaQuery.of(context).size.height / 4.5,
+          height: MediaQuery.of(context).orientation == Orientation.landscape
+              ? MediaQuery.of(context).size.width / 4.5
+              : MediaQuery.of(context).size.height / 4.5,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
@@ -124,7 +123,7 @@ class _MapScreenState extends State<MapScreen> {
         ListView(
           padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
           shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           children: [
             SizedBox(
               width: 180,

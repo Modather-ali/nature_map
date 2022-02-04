@@ -1,8 +1,10 @@
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:like_button/like_button.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/map_screen.dart';
@@ -139,6 +141,34 @@ class _LandscapesListState extends State<LandscapesList> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
+                    LikeButton(
+                      likeCountAnimationType: LikeCountAnimationType.all,
+                      // circleColor: const CircleColor(
+                      //     start: Color(0xff00ddff), end: Color(0xff0099cc)),
+                      // bubblesColor: const BubblesColor(
+                      //   dotPrimaryColor: Color(0xff33b5e5),
+                      //   dotSecondaryColor: Color(0xff0099cc),
+                      // ),
+                      likeBuilder: (bool isLiked) {
+                        return Icon(
+                          Icons.favorite,
+                          color: isLiked ? Colors.red : Colors.grey,
+                          size: 30,
+                        );
+                      },
+                      likeCount: 665,
+                      onTap: (isLiked) async {
+                        _firebaseDatabase.updateUserFavoriteLandscapes(
+                            userEmail: FirebaseAuth.instance.currentUser!.email
+                                .toString(),
+                            landscape: landscapeData);
+                        _firebaseDatabase.updateLandscapesFans(
+                            userEmail: FirebaseAuth.instance.currentUser!.email
+                                .toString(),
+                            landscape: landscapeData);
+                        return !isLiked;
+                      },
+                    ),
                     SizedBox(
                       height: MediaQuery.of(context).orientation ==
                               Orientation.landscape
@@ -153,8 +183,11 @@ class _LandscapesListState extends State<LandscapesList> {
                         fit: BoxFit.fill,
                       ),
                     ),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     OpenContainer(
-                        transitionDuration: Duration(milliseconds: 650),
+                        transitionDuration: const Duration(milliseconds: 650),
                         closedElevation: 8,
                         transitionType: ContainerTransitionType.fade,
                         closedBuilder: (context, closedBuilder) {
@@ -227,10 +260,10 @@ class _LandscapesListState extends State<LandscapesList> {
     Color cardColor;
     switch (tag) {
       case "Mountain":
-        cardColor = Color(0xFF7f4f24);
+        cardColor = const Color(0xFF7f4f24);
         break;
       case "Sea":
-        cardColor = Color(0xFF014f86);
+        cardColor = const Color(0xFF014f86);
         break;
       case "Desert":
         cardColor = const Color(0xFFffba08);
@@ -247,7 +280,7 @@ class _LandscapesListState extends State<LandscapesList> {
     return Card(
       elevation: 18,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         child: Text("$tag"),
       ),
       color: cardColor,

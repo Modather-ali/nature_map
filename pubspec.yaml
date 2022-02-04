@@ -53,6 +53,8 @@ dependencies:
   animations: ^2.0.2
   timer_builder: ^2.0.0
   permission_handler: ^8.3.0
+  photo_view: ^0.13.0
+  like_button: ^2.0.4
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
+import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
+import 'package:nature_map/methods/backend/firebase_database.dart';
+import 'package:nature_map/methods/state_management/provider_methods.dart';
+import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
   final QueryDocumentSnapshot landscapeData;
@@ -15,9 +20,24 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late double latitude, longitude;
+  bool isLoading = false;
+  late Map<String, dynamic> _userData = {};
+  User? user = FirebaseAuth.instance.currentUser;
+
+  final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
 
   late CameraPosition _cameraPosition;
   var _placemark;
+
+  _getDate() async {
+    if (user != null) {
+      _userData = await _firebaseDatabase.getUserData(
+          userEmail: user!.email.toString());
+    }
+
+    setState(() {});
+  }
+
   _getLocationData() async {
     latitude = widget.landscapeData["lat"];
     longitude = widget.landscapeData["long"];
@@ -28,6 +48,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void initState() {
+    _getDate();
     _getLocationData();
     super.initState();
   }
@@ -125,12 +146,24 @@ class _MapScreenState extends State<MapScreen> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            SizedBox(
-              width: 180,
-              child: Text(
-                widget.landscapeData['land_name'],
-                style: appTheme().textTheme.headline3,
-              ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 180,
+                  child: Text(
+                    widget.landscapeData['land_name'],
+                    style: appTheme().textTheme.headline3,
+                  ),
+                ),
+                _favoriteButton(
+                  landscapeData: widget.landscapeData,
+                )
+
+                // _favoriteButton(
+                //     landscapeData: widget.landscapeData,
+                //     isFan: isFan,
+                //     fansNumber: widget.landscapeData["fans"].length.toString())
+              ],
             ),
             const SizedBox(
               height: 10,
@@ -165,5 +198,76 @@ class _MapScreenState extends State<MapScreen> {
         )
       ],
     );
+  }
+
+  Widget _favoriteButton({
+    required QueryDocumentSnapshot<Object?> landscapeData,
+  }) {
+    return Consumer<FavoriteLandsapesProvider>(
+        builder: (context, providerValue, chlid) {
+      return Stack(
+        children: [
+          Row(
+            children: [
+              isLoading
+                  ? const SizedBox(
+                      height: 50.0,
+                      child: LoadingIndicator(
+                        indicatorType: Indicator.ballScale,
+                        colors: kDefaultRainbowColors,
+                        strokeWidth: 4.0,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: () async {
+                        if (user != null) {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          try {
+                            await _firebaseDatabase
+                                .updateUserFavoriteLandscapes(
+                                    userEmail: FirebaseAuth
+                                        .instance.currentUser!.email
+                                        .toString(),
+                                    landscape: landscapeData);
+                            await _firebaseDatabase.updateLandscapesFans(
+                                userEmail: FirebaseAuth
+                                    .instance.currentUser!.email
+                                    .toString(),
+                                landscape: landscapeData);
+                            await _getDate();
+                          } catch (e) {
+                            debugPrint("Error while update fans: $e");
+                          }
+
+                          setState(() {
+                            isLoading = false;
+                            providerValue.isFan = !providerValue.isFan;
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                              message: "Error you are not registered",
+                              color: Colors.red));
+                        }
+                      },
+                      icon: Icon(
+                        providerValue.isFan
+                            ? Icons.favorite
+                            : Icons.favorite_border_outlined,
+                        color: providerValue.isFan ? Colors.red : Colors.grey,
+                      ),
+                    ),
+              Text(
+                providerValue.fansNumber.toString(),
+                style: appTheme().textTheme.headline4!.copyWith(
+                      color: providerValue.isFan ? Colors.red : Colors.black,
+                    ),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 }

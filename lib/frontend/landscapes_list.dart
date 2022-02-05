@@ -10,6 +10,7 @@ import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/map_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
+import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 
 class LandscapesList extends StatefulWidget {
@@ -28,7 +29,6 @@ class _LandscapesListState extends State<LandscapesList> {
   var _position;
   List<QueryDocumentSnapshot<Object?>> _landscapesDataList = [];
 
-  bool isFan = false;
   List<bool> _isLoading = [];
 
   late Map<String, dynamic> _userData = {};
@@ -138,9 +138,6 @@ class _LandscapesListState extends State<LandscapesList> {
     required int index,
     required QueryDocumentSnapshot<Object?> landscapeData,
   }) {
-    if (_userData.isNotEmpty) {
-      isFan = _userData["favorite_landscapes"].contains(landscapeData.id);
-    }
     _distanceBetween = Geolocator.distanceBetween(_position.latitude,
         _position.longitude, landscapeData["lat"], landscapeData["long"]);
 
@@ -160,10 +157,9 @@ class _LandscapesListState extends State<LandscapesList> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _favoriteButton(
-                        landscapeData: landscapeData,
-                        isFan: isFan,
-                        fansNumber: landscapeData["fans"].length.toString(),
-                        index: index),
+                      landscapeData: landscapeData,
+                      index: index,
+                    ),
                     SizedBox(
                       height: MediaQuery.of(context).orientation ==
                               Orientation.landscape
@@ -284,68 +280,79 @@ class _LandscapesListState extends State<LandscapesList> {
 
   Widget _favoriteButton({
     required QueryDocumentSnapshot<Object?> landscapeData,
-    required bool isFan,
     int index = 0,
-    required String fansNumber,
   }) {
-    return Stack(
-      children: [
-        Row(
-          children: [
-            _isLoading[index]
-                ? const SizedBox(
-                    height: 50.0,
-                    child: LoadingIndicator(
-                      indicatorType: Indicator.ballScale,
-                      colors: kDefaultRainbowColors,
-                      strokeWidth: 4.0,
-                    ),
-                  )
-                : IconButton(
-                    onPressed: () async {
-                      if (user != null) {
-                        setState(() {
-                          _isLoading[index] = true;
-                        });
-                        try {
-                          await _firebaseDatabase.updateUserFavoriteLandscapes(
-                              userEmail: FirebaseAuth
-                                  .instance.currentUser!.email
-                                  .toString(),
-                              landscape: landscapeData);
-                          await _firebaseDatabase.updateLandscapesFans(
-                              userEmail: FirebaseAuth
-                                  .instance.currentUser!.email
-                                  .toString(),
-                              landscape: landscapeData);
-                          await _getDate();
-                        } catch (e) {
-                          debugPrint("Error while update fans: $e");
-                        }
+    return Consumer<FavoriteLandsapesProvider>(
+        builder: (context, providerValue, chlid) {
+      if (_userData.isNotEmpty) {
+        providerValue.isFan =
+            _userData["favorite_landscapes"].contains(landscapeData.id);
+      }
+      providerValue.fansNumber = landscapeData["fans"].length;
 
-                        setState(() {
-                          _isLoading[index] = false;
-                        });
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar(
-                            message: "Error you are not registered",
-                            color: Colors.red));
-                      }
-                    },
-                    icon: Icon(
-                      isFan ? Icons.favorite : Icons.favorite_border_outlined,
-                      color: isFan ? Colors.red : Colors.grey,
+      return Stack(
+        children: [
+          Row(
+            children: [
+              _isLoading[index]
+                  ? const SizedBox(
+                      height: 50.0,
+                      child: LoadingIndicator(
+                        indicatorType: Indicator.ballScale,
+                        colors: kDefaultRainbowColors,
+                        strokeWidth: 4.0,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: () async {
+                        if (user != null) {
+                          setState(() {
+                            _isLoading[index] = true;
+                          });
+                          try {
+                            await _firebaseDatabase
+                                .updateUserFavoriteLandscapes(
+                                    userEmail: FirebaseAuth
+                                        .instance.currentUser!.email
+                                        .toString(),
+                                    landscape: landscapeData);
+                            await _firebaseDatabase.updateLandscapesFans(
+                                userEmail: FirebaseAuth
+                                    .instance.currentUser!.email
+                                    .toString(),
+                                landscape: landscapeData);
+                            await _getDate();
+                          } catch (e) {
+                            debugPrint("Error while update fans: $e");
+                          }
+
+                          setState(() {
+                            _isLoading[index] = false;
+                            providerValue.isFan = !providerValue.isFan;
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                              message: "Error you are not registered",
+                              color: Colors.red));
+                        }
+                      },
+                      icon: Icon(
+                        providerValue.isFan
+                            ? Icons.favorite
+                            : Icons.favorite_border_outlined,
+                        color: providerValue.isFan ? Colors.red : Colors.grey,
+                      ),
                     ),
-                  ),
-            Text(
-              fansNumber,
-              style: appTheme().textTheme.headline4!.copyWith(
-                    color: isFan ? Colors.red : Colors.black,
-                  ),
-            ),
-          ],
-        ),
-      ],
-    );
+              Text(
+                providerValue.fansNumber.toString(),
+                style: appTheme().textTheme.headline4!.copyWith(
+                      color: providerValue.isFan ? Colors.red : Colors.black,
+                    ),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 }

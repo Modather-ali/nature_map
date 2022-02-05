@@ -128,6 +128,8 @@ class FirebaseDatabase {
       {required String userEmail,
       required QueryDocumentSnapshot landscape}) async {
     try {
+      WriteBatch writeBatch = FirebaseFirestore.instance.batch();
+
       DocumentReference userReference = FirebaseFirestore.instance
           .collection(usersCollectionPath)
           .doc(userEmail);
@@ -135,14 +137,17 @@ class FirebaseDatabase {
       DocumentSnapshot userData = await userReference.get();
 
       List favoriteLandscapes = userData["favorite_landscapes"];
+
       if (favoriteLandscapes.contains(landscape.id)) {
         favoriteLandscapes.remove(landscape.id);
       } else {
         favoriteLandscapes.add(landscape.id);
       }
+
       userReference.update({
         "favorite_landscapes": favoriteLandscapes,
       });
+
       favoriteLandscapes.clear();
       debugPrint("Update succeeded");
     } catch (e) {

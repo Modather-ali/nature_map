@@ -27,8 +27,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (BuildContext context) => LandscapeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (BuildContext context) => LandscapeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (BuildContext context) => FavoriteLandsapesProvider(),
+        ),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',

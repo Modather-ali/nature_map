@@ -30,3 +30,9 @@ class LandscapeProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+class FavoriteLandsapesProvider extends ChangeNotifier {
+  int fansNumber = 0;
+
+  bool isFan = false;
+}

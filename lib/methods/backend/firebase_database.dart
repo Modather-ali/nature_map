@@ -114,6 +114,16 @@ class FirebaseDatabase {
     }
   }
 
+  Future getUserData({required String userEmail}) async {
+    CollectionReference userReference =
+        FirebaseFirestore.instance.collection(usersCollectionPath);
+
+    DocumentSnapshot<Object?> userData =
+        await userReference.doc(userEmail).get();
+
+    return userData.data();
+  }
+
   Future updateUserFavoriteLandscapes(
       {required String userEmail,
       required QueryDocumentSnapshot landscape}) async {
@@ -134,6 +144,7 @@ class FirebaseDatabase {
         "favorite_landscapes": favoriteLandscapes,
       });
       favoriteLandscapes.clear();
+      debugPrint("Update succeeded");
     } catch (e) {
       debugPrint("error while update users  favorite landscape: $e");
     }
@@ -160,6 +171,7 @@ class FirebaseDatabase {
         "fans": favoriteLandscapes,
       });
       favoriteLandscapes.clear();
+      debugPrint("Update succeeded");
     } catch (e) {
       debugPrint("error while update landscape fans: $e");
     }

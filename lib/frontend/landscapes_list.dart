@@ -28,12 +28,26 @@ class _LandscapesListState extends State<LandscapesList> {
   var _position;
   List<QueryDocumentSnapshot<Object?>> _landscapesDataList = [];
 
+  bool isFan = false;
+  List<bool> _isLoading = [];
+
+  late Map<String, dynamic> _userData = {};
+
+  User? user = FirebaseAuth.instance.currentUser;
+
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
 
-  _getLandscapesDate() async {
+  _getDate() async {
     _landscapesDataList = await _firebaseDatabase.getLandscapesData(
         landTag: widget.landscapeName);
+    for (var land in _landscapesDataList) {
+      _isLoading.add(false);
+    }
 
+    if (user != null) {
+      _userData = await _firebaseDatabase.getUserData(
+          userEmail: user!.email.toString());
+    }
     setState(() {});
   }
 
@@ -73,8 +87,9 @@ class _LandscapesListState extends State<LandscapesList> {
 
   @override
   void initState() {
-    _getLandscapesDate();
+    _getDate();
     _getCurrentPosition();
+
     super.initState();
   }
 
@@ -86,7 +101,6 @@ class _LandscapesListState extends State<LandscapesList> {
         actions: [
           IconButton(
               onPressed: () {
-                _getLandscapesDate();
                 debugPrint(_landscapesDataList[0].id.toString());
               },
               icon: const Icon(Icons.clear_all))
@@ -124,8 +138,12 @@ class _LandscapesListState extends State<LandscapesList> {
     required int index,
     required QueryDocumentSnapshot<Object?> landscapeData,
   }) {
+    if (_userData.isNotEmpty) {
+      isFan = _userData["favorite_landscapes"].contains(landscapeData.id);
+    }
     _distanceBetween = Geolocator.distanceBetween(_position.latitude,
         _position.longitude, landscapeData["lat"], landscapeData["long"]);
+
     return Card(
       margin: const EdgeInsets.all(10.0),
       elevation: 16,
@@ -141,34 +159,11 @@ class _LandscapesListState extends State<LandscapesList> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    LikeButton(
-                      likeCountAnimationType: LikeCountAnimationType.all,
-                      // circleColor: const CircleColor(
-                      //     start: Color(0xff00ddff), end: Color(0xff0099cc)),
-                      // bubblesColor: const BubblesColor(
-                      //   dotPrimaryColor: Color(0xff33b5e5),
-                      //   dotSecondaryColor: Color(0xff0099cc),
-                      // ),
-                      likeBuilder: (bool isLiked) {
-                        return Icon(
-                          Icons.favorite,
-                          color: isLiked ? Colors.red : Colors.grey,
-                          size: 30,
-                        );
-                      },
-                      likeCount: 665,
-                      onTap: (isLiked) async {
-                        _firebaseDatabase.updateUserFavoriteLandscapes(
-                            userEmail: FirebaseAuth.instance.currentUser!.email
-                                .toString(),
-                            landscape: landscapeData);
-                        _firebaseDatabase.updateLandscapesFans(
-                            userEmail: FirebaseAuth.instance.currentUser!.email
-                                .toString(),
-                            landscape: landscapeData);
-                        return !isLiked;
-                      },
-                    ),
+                    _favoriteButton(
+                        landscapeData: landscapeData,
+                        isFan: isFan,
+                        fansNumber: landscapeData["fans"].length.toString(),
+                        index: index),
                     SizedBox(
                       height: MediaQuery.of(context).orientation ==
                               Orientation.landscape
@@ -284,6 +279,73 @@ class _LandscapesListState extends State<LandscapesList> {
         child: Text("$tag"),
       ),
       color: cardColor,
+    );
+  }
+
+  Widget _favoriteButton({
+    required QueryDocumentSnapshot<Object?> landscapeData,
+    required bool isFan,
+    int index = 0,
+    required String fansNumber,
+  }) {
+    return Stack(
+      children: [
+        Row(
+          children: [
+            _isLoading[index]
+                ? const SizedBox(
+                    height: 50.0,
+                    child: LoadingIndicator(
+                      indicatorType: Indicator.ballScale,
+                      colors: kDefaultRainbowColors,
+                      strokeWidth: 4.0,
+                    ),
+                  )
+                : IconButton(
+                    onPressed: () async {
+                      if (user != null) {
+                        setState(() {
+                          _isLoading[index] = true;
+                        });
+                        try {
+                          await _firebaseDatabase.updateUserFavoriteLandscapes(
+                              userEmail: FirebaseAuth
+                                  .instance.currentUser!.email
+                                  .toString(),
+                              landscape: landscapeData);
+                          await _firebaseDatabase.updateLandscapesFans(
+                              userEmail: FirebaseAuth
+                                  .instance.currentUser!.email
+                                  .toString(),
+                              landscape: landscapeData);
+                          await _getDate();
+                        } catch (e) {
+                          debugPrint("Error while update fans: $e");
+                        }
+
+                        setState(() {
+                          _isLoading[index] = false;
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                            message: "Error you are not registered",
+                            color: Colors.red));
+                      }
+                    },
+                    icon: Icon(
+                      isFan ? Icons.favorite : Icons.favorite_border_outlined,
+                      color: isFan ? Colors.red : Colors.grey,
+                    ),
+                  ),
+            Text(
+              fansNumber,
+              style: appTheme().textTheme.headline4!.copyWith(
+                    color: isFan ? Colors.red : Colors.black,
+                  ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

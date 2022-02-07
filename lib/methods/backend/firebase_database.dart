@@ -85,18 +85,28 @@ class FirebaseDatabase {
   }
 
   Future<List<QueryDocumentSnapshot<Object?>>> getLandscapesData(
-      {required String landTag}) async {
+      {required List landTag}) async {
     try {
       CollectionReference collectionReference =
           FirebaseFirestore.instance.collection(landsCollectionPath);
       QuerySnapshot<Object?> querySnapshotn = await collectionReference
-          .where("tages", arrayContains: landTag)
+          .where("tages", arrayContainsAny: landTag)
           .get();
       return querySnapshotn.docs;
     } catch (e) {
       debugPrint("error when get data from firebase: $e");
       return [];
     }
+  }
+
+  Future getUserData({required String userEmail}) async {
+    CollectionReference userReference =
+        FirebaseFirestore.instance.collection(usersCollectionPath);
+
+    DocumentSnapshot<Object?> userData =
+        await userReference.doc(userEmail).get();
+
+    return userData.data();
   }
 
   Future<List<QueryDocumentSnapshot<Object?>>> getLandDataForThisUser(
@@ -114,14 +124,19 @@ class FirebaseDatabase {
     }
   }
 
-  Future getUserData({required String userEmail}) async {
-    CollectionReference userReference =
-        FirebaseFirestore.instance.collection(usersCollectionPath);
-
-    DocumentSnapshot<Object?> userData =
-        await userReference.doc(userEmail).get();
-
-    return userData.data();
+  Future<List<QueryDocumentSnapshot<Object?>>> getUserFavoritesLandscapes(
+      {required String userEmail}) async {
+    try {
+      CollectionReference collectionReference =
+          FirebaseFirestore.instance.collection(landsCollectionPath);
+      QuerySnapshot<Object?> querySnapshotn = await collectionReference
+          .where("fans", arrayContains: userEmail)
+          .get();
+      return querySnapshotn.docs;
+    } catch (e) {
+      debugPrint("error when get data from firebase: $e");
+      return [];
+    }
   }
 
   Future updateUserFavoriteLandscapes(

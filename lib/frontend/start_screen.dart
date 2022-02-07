@@ -97,12 +97,12 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                       context: context,
                       imagePath: "assets/images/mountain.jpg",
-                      landscapeName: "Mountain",
+                      landscapeName: ["Mountain"],
                       color: const Color(0xFF7f4f24)),
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/sea.jpg",
-                    landscapeName: "Sea",
+                    landscapeName: ["Sea"],
                     color: const Color(0xFF014f86),
                   ),
                 ],
@@ -116,12 +116,12 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                       context: context,
                       imagePath: "assets/images/desert.jpg",
-                      landscapeName: "Desert",
+                      landscapeName: ["Desert"],
                       color: const Color(0xFFffba08)),
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/volcano.jpg",
-                    landscapeName: "Volcano",
+                    landscapeName: ["Volcano"],
                     color: const Color(0xFFae2012),
                   ),
                 ],
@@ -135,13 +135,13 @@ class _StartScreenState extends State<StartScreen> {
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/forest.jpg",
-                    landscapeName: "Forest",
+                    landscapeName: ["Forest"],
                     color: const Color(0xFF2d6a4f),
                   ),
                   _landscapeButton(
                     context: context,
                     imagePath: "assets/images/civilization.jpg",
-                    landscapeName: "Civilization",
+                    landscapeName: ["Civilization"],
                     color: const Color(0xFF7b2cbf),
                   ),
                 ],
@@ -184,7 +184,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _landscapeButton(
       {required BuildContext context,
       required String imagePath,
-      required String landscapeName,
+      required List<String> landscapeName,
       required Color color}) {
     return GestureDetector(
       onTap: () {
@@ -231,7 +231,7 @@ class _StartScreenState extends State<StartScreen> {
               ),
             ),
             Text(
-              landscapeName,
+              landscapeName[0],
               style: appTheme().textTheme.headline2,
             ),
           ],

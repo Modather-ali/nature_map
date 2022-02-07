@@ -14,7 +14,7 @@ import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 
 class LandscapesList extends StatefulWidget {
-  final String landscapeName;
+  final List<String> landscapeName;
   final Color color;
   const LandscapesList(
       {Key? key, this.color = Colors.blue, required this.landscapeName})

@@ -112,12 +112,21 @@ class _UserDiscoveriesState extends State<UserDiscoveries> {
             Text(landscape["land_name"],
                 style: appTheme().textTheme.headline3!.copyWith(fontSize: 11)),
             Row(
-              children: const [
+              children: [
                 Icon(
                   Icons.favorite,
                   color: Colors.red,
                 ),
-                Text('0'),
+                SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  landscape["fans"].length.toString(),
+                  style: appTheme()
+                      .textTheme
+                      .headline4!
+                      .copyWith(color: Colors.black),
+                ),
               ],
             ),
             OpenContainer(

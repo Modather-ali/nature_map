@@ -1,9 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_list.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:nature_map/frontend/search_screen.dart';
+import 'package:nature_map/methods/backend/firebase_database.dart';
+import 'package:nature_map/methods/state_management/provider_methods.dart';
+import 'package:provider/provider.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -14,22 +19,37 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
   var connectivityResult;
-//  late AnimationController _animationController;
+
+  List<QueryDocumentSnapshot<Object?>> _landscapesDataList = [];
+  List _allLandscapesNames = [];
 
   _checkConnectivity() async {
     connectivityResult = await (Connectivity().checkConnectivity());
     setState(() {});
-    print("connectivityResult: $connectivityResult");
+    debugPrint("connectivityResult: $connectivityResult");
+  }
+
+  _getLandscapesDate() async {
+    if (connectivityResult != ConnectionState.none) {
+      _landscapesDataList = await FirebaseDatabase().getLandscapesData(
+          landTag: [
+            "Mountain",
+            "Sea",
+            "Desert",
+            "Volcano",
+            "Forest",
+            "Civilization"
+          ]);
+      for (var landscape in _landscapesDataList) {
+        _allLandscapesNames.add(landscape["land_name"]);
+      }
+    }
   }
 
   @override
   void initState() {
     _checkConnectivity();
-    // _animationController = AnimationController(
-    //   animationBehavior: AnimationBehavior.preserve,
-    //   vsync: this,
-    //   duration: const Duration(milliseconds: 500),
-    // );
+    _getLandscapesDate();
     super.initState();
   }
 
@@ -58,6 +78,8 @@ class _StartScreenState extends State<StartScreen> {
             child: ElevatedButton(
               onPressed: () {
                 _checkConnectivity();
+                _getLandscapesDate();
+                setState(() {});
               },
               child: const Text("Reload this Page"),
             ),
@@ -154,25 +176,28 @@ class _StartScreenState extends State<StartScreen> {
               IconButton(
                 color: Colors.white,
                 onPressed: () {
-                  // if (_animationController.isCompleted) {
-                  //   _animationController.reverse();
-                  // } else {
-                  //   _animationController.forward();
-                  // }
                   ZoomDrawer.of(context)?.open();
                 },
-                icon: Icon(Icons.menu),
+                icon: const Icon(Icons.menu),
               ),
               Text(
                 "Nature Map",
                 style: appTheme().textTheme.headline1,
               ),
-              IconButton(
-                color: Colors.white,
-                onPressed: () {
-                  print("Searching...");
+              Consumer<DifferentLandsapesValus>(
+                builder: (context, providerValue, child) {
+                  providerValue.allLandscapesNames = _allLandscapesNames;
+                  return IconButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      print("Searching...");
+                      showSearch(
+                          context: context,
+                          delegate: SearchScreen(_allLandscapesNames));
+                    },
+                    icon: const Icon(Icons.search),
+                  );
                 },
-                icon: const Icon(Icons.search),
               ),
             ],
           ),

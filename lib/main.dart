@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           create: (BuildContext context) => LandscapeProvider(),
         ),
         ChangeNotifierProvider(
-          create: (BuildContext context) => FavoriteLandsapesProvider(),
+          create: (BuildContext context) => DifferentLandsapesValus(),
         ),
       ],
       child: MaterialApp(

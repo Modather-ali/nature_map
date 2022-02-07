@@ -8,6 +8,7 @@ import 'package:like_button/like_button.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/map_screen.dart';
+import 'package:nature_map/frontend/search_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
@@ -105,8 +106,36 @@ class _LandscapesListState extends State<LandscapesList> {
               },
               icon: const Icon(Icons.clear_all))
         ],
-        title: const TextField(
-          maxLines: 1,
+        title: Consumer<DifferentLandsapesValus>(
+          builder: (context, providerValue, child) {
+            return GestureDetector(
+              onTap: () {
+                showSearch(
+                    context: context,
+                    delegate: SearchScreen(providerValue.allLandscapesNames));
+              },
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.search,
+                      color: Colors.black,
+                    ),
+                    Text(
+                      "Search?",
+                      style: appTheme().textTheme.headline4,
+                    ),
+                  ],
+                ),
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
+            );
+          },
         ),
       ),
       body: _position == null
@@ -282,7 +311,7 @@ class _LandscapesListState extends State<LandscapesList> {
     required QueryDocumentSnapshot<Object?> landscapeData,
     int index = 0,
   }) {
-    return Consumer<FavoriteLandsapesProvider>(
+    return Consumer<DifferentLandsapesValus>(
         builder: (context, providerValue, chlid) {
       if (_userData.isNotEmpty) {
         providerValue.isFan =

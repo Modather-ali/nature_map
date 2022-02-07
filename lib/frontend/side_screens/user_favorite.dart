@@ -9,8 +9,6 @@ import 'package:nature_map/frontend/map_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:like_button/like_button.dart';
 import 'package:provider/provider.dart';
 
 class UserFavorite extends StatefulWidget {
@@ -34,8 +32,9 @@ class _UserFavoriteState extends State<UserFavorite> {
   _getFavoriteLandscapeData() async {
     try {
       if (FirebaseAuth.instance.currentUser != null) {
-        _favoritesLandscapes = await _firebaseDatabase.getLandDataForThisUser(
-            userEmail: FirebaseAuth.instance.currentUser!.email.toString());
+        _favoritesLandscapes =
+            await _firebaseDatabase.getUserFavoritesLandscapes(
+                userEmail: FirebaseAuth.instance.currentUser!.email.toString());
 
         for (var land in _favoritesLandscapes) {
           _isLoading.add(false);
@@ -274,7 +273,7 @@ class _UserFavoriteState extends State<UserFavorite> {
     required QueryDocumentSnapshot<Object?> landscapeData,
     int index = 0,
   }) {
-    return Consumer<FavoriteLandsapesProvider>(
+    return Consumer<DifferentLandsapesValus>(
         builder: (context, providerValue, chlid) {
       if (_userData.isNotEmpty) {
         providerValue.isFan =
@@ -317,7 +316,6 @@ class _UserFavoriteState extends State<UserFavorite> {
                           } catch (e) {
                             debugPrint("Error while update fans: $e");
                           }
-
                           setState(() {
                             _isLoading[index] = false;
                             providerValue.isFan = !providerValue.isFan;

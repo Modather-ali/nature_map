@@ -203,7 +203,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget _favoriteButton({
     required QueryDocumentSnapshot<Object?> landscapeData,
   }) {
-    return Consumer<FavoriteLandsapesProvider>(
+    return Consumer<DifferentLandsapesValus>(
         builder: (context, providerValue, chlid) {
       return Stack(
         children: [

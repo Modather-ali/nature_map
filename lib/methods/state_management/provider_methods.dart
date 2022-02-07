@@ -31,8 +31,10 @@ class LandscapeProvider extends ChangeNotifier {
   }
 }
 
-class FavoriteLandsapesProvider extends ChangeNotifier {
+class DifferentLandsapesValus extends ChangeNotifier {
   int fansNumber = 0;
 
   bool isFan = false;
+
+  List allLandscapesNames = [];
 }

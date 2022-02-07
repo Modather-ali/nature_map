@@ -21,7 +21,7 @@ class _StartScreenState extends State<StartScreen> {
   var connectivityResult;
 
   List<QueryDocumentSnapshot<Object?>> _landscapesDataList = [];
-  List _allLandscapesNames = [];
+  final List _allLandscapesNames = [];
 
   _checkConnectivity() async {
     connectivityResult = await (Connectivity().checkConnectivity());

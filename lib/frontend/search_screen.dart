@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:nature_map/app_theme.dart';
+import 'package:nature_map/frontend/map_screen.dart';
+import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
+import 'package:nature_map/methods/backend/firebase_database.dart';
 
 class SearchScreen extends SearchDelegate {
   final List _allLandscapesNames;
-
   SearchScreen(this._allLandscapesNames);
 
   @override
@@ -33,6 +36,7 @@ class SearchScreen extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    QueryDocumentSnapshot<Object?>? _landscapeData;
     List _searchMatches = _allLandscapesNames
         .where((element) => element.contains(query))
         .toList();
@@ -40,7 +44,23 @@ class SearchScreen extends SearchDelegate {
       itemCount: _searchMatches.length,
       itemBuilder: (context, i) {
         return ListTile(
-          onTap: () {},
+          onTap: () async {
+            query = _searchMatches[i];
+            _landscapeData = (await FirebaseDatabase().getLandscapesDataByName(
+              landscapeName: "${_searchMatches[i]}",
+            ))!;
+            if (_landscapeData == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  snackBar(message: "Error happened!", color: Colors.red));
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      MapScreen(landscapeData: _landscapeData!),
+                ),
+              );
+            }
+          },
           title: Text(
             "${_searchMatches[i]}",
             style:

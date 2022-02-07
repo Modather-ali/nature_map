@@ -118,7 +118,7 @@ class _LandscapesListState extends State<LandscapesList> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.search,
                       color: Colors.black,
                     ),

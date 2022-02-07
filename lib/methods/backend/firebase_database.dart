@@ -23,7 +23,6 @@ class FirebaseDatabase {
         await documentReference.set({
           "user_name": userName,
           "profile_image_link": '-',
-          "background_image_link": '-',
           "creation_date": currentDate,
           "favorite_landscapes": [],
         });
@@ -96,6 +95,22 @@ class FirebaseDatabase {
     } catch (e) {
       debugPrint("error when get data from firebase: $e");
       return [];
+    }
+  }
+
+  Future<QueryDocumentSnapshot<Object?>?> getLandscapesDataByName({
+    required String landscapeName,
+  }) async {
+    try {
+      CollectionReference collectionReference =
+          FirebaseFirestore.instance.collection(landsCollectionPath);
+      QuerySnapshot<Object?> querySnapshotn = await collectionReference
+          .where("land_name", isEqualTo: landscapeName)
+          .get();
+      return querySnapshotn.docs.first;
+    } catch (e) {
+      debugPrint("error when get data from firebase: $e");
+      return null;
     }
   }
 

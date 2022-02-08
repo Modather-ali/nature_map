@@ -64,7 +64,7 @@ class _UserDiscoveriesState extends State<UserDiscoveries> {
         ],
       ),
       floatingActionButton: FirebaseAuth.instance.currentUser == null
-          ? SizedBox()
+          ? const SizedBox()
           : Padding(
               padding: const EdgeInsets.all(15),
               child: OpenContainer(
@@ -113,11 +113,11 @@ class _UserDiscoveriesState extends State<UserDiscoveries> {
                 style: appTheme().textTheme.headline3!.copyWith(fontSize: 11)),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.favorite,
                   color: Colors.red,
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Text(
@@ -176,6 +176,8 @@ class _UserDiscoveriesState extends State<UserDiscoveries> {
               } else if (signinResult == GoogleSigninResults.signInCompleted) {
                 _roundedLoadingButtonController.success();
                 await _firebaseDatabase.registerNewUser(
+                  imageUrl:
+                      FirebaseAuth.instance.currentUser!.photoURL.toString(),
                   userEmail:
                       FirebaseAuth.instance.currentUser!.email.toString(),
                   userName:

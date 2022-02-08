@@ -4,3 +4,8 @@ enum GoogleSigninResults {
   unexpectedError,
   alreadySignedIn,
 }
+
+enum ImageType {
+  fileImage,
+  networkImage,
+}

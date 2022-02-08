@@ -270,7 +270,7 @@ class _AddLandscapeState extends State<AddLandscape> {
       radius: const Radius.circular(10),
       borderType: BorderType.RRect,
       strokeCap: StrokeCap.round,
-      dashPattern: [10, 10],
+      dashPattern: const [10, 10],
       color: Colors.grey,
       child: InkWell(
         onTap: () {
@@ -281,20 +281,29 @@ class _AddLandscapeState extends State<AddLandscape> {
               builder: (context) {
                 return Container(
                   alignment: Alignment.center,
-                  height: 200,
-                  child: Row(
+                  height: MediaQuery.of(context).size.height / 4,
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _choiceImageButton(
-                          landImages: landImages,
-                          source: "From Gallery",
-                          imageSource: ImageSource.gallery,
-                          iconData: Icons.add_a_photo_outlined),
-                      _choiceImageButton(
-                          landImages: landImages,
-                          source: "From Camera",
-                          imageSource: ImageSource.camera,
-                          iconData: Icons.image_outlined),
+                      Text(
+                        "Add a new photo:",
+                        style: appTheme().textTheme.headline4,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _choiceImageButton(
+                              landImages: landImages,
+                              source: "From Gallery",
+                              imageSource: ImageSource.gallery,
+                              iconData: Icons.add_a_photo_outlined),
+                          _choiceImageButton(
+                              landImages: landImages,
+                              source: "From Camera",
+                              imageSource: ImageSource.camera,
+                              iconData: Icons.image_outlined),
+                        ],
+                      ),
                     ],
                   ),
                 );

@@ -12,6 +12,7 @@ class FirebaseDatabase {
   registerNewUser({
     required String userEmail,
     required String userName,
+    required String imageUrl,
   }) async {
     final String currentDate =
         "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
@@ -19,12 +20,14 @@ class FirebaseDatabase {
         .collection(usersCollectionPath)
         .doc(userEmail);
     try {
-      if (documentReference.id != userEmail) {
+      if (documentReference.id.isNotEmpty) {
         await documentReference.set({
           "user_name": userName,
-          "profile_image_link": '-',
+          "profile_image_link": imageUrl,
           "creation_date": currentDate,
+          "about_user": "",
           "favorite_landscapes": [],
+          "show_email": true
         });
       } else {
         debugPrint("this user alredy registred");

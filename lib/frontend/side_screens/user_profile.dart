@@ -2,10 +2,10 @@ import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/discover_landscape.dart';
 import 'package:nature_map/frontend/map_screen.dart';
+import 'package:nature_map/frontend/side_screens/edit_profile.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
@@ -14,7 +14,7 @@ import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:dotted_border/dotted_border.dart';
 
 class UserProfile extends StatefulWidget {
-  UserProfile({Key? key}) : super(key: key);
+  const UserProfile({Key? key}) : super(key: key);
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -27,10 +27,19 @@ class _UserProfileState extends State<UserProfile> {
   final RoundedLoadingButtonController _roundedLoadingButtonController =
       RoundedLoadingButtonController();
 
-  _getProfileImage() {
+  var _userData;
+
+  _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
-      return NetworkImage(
-          FirebaseAuth.instance.currentUser!.photoURL.toString());
+      _userData = await _firebaseDatabase.getUserData(
+          userEmail: FirebaseAuth.instance.currentUser!.email.toString());
+      setState(() {});
+    }
+  }
+
+  _getProfileImage() {
+    if (_userData != null) {
+      return NetworkImage(_userData["profile_image_link"].toString());
     } else {
       return const AssetImage("assets/images/profile_avatar.png");
     }
@@ -53,6 +62,7 @@ class _UserProfileState extends State<UserProfile> {
 
   @override
   void initState() {
+    _getUserData();
     _getLandscapeData();
     super.initState();
   }
@@ -74,7 +84,7 @@ class _UserProfileState extends State<UserProfile> {
                     style: appTheme().textTheme.headline4,
                   ),
                 ),
-                Container(
+                SizedBox(
                   height: MediaQuery.of(context).size.height / 1.8,
                   child: _addedlandscapesList(),
                 ),
@@ -119,21 +129,22 @@ class _UserProfileState extends State<UserProfile> {
               const SizedBox(
                 height: 20,
               ),
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.black,
-                    radius: 50,
-                    child: Hero(
-                      tag: "profile avatar",
-                      child: CircleAvatar(
-                        foregroundImage: _getProfileImage(),
-                        radius: 49,
-                      ),
+              CircleAvatar(
+                backgroundColor: Colors.black,
+                radius: 50,
+                child: Hero(
+                  tag: "profile avatar",
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const EditProfile()));
+                    },
+                    child: CircleAvatar(
+                      foregroundImage: _getProfileImage(),
+                      radius: 48,
                     ),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -147,9 +158,8 @@ class _UserProfileState extends State<UserProfile> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: Text(
-                  FirebaseAuth.instance.currentUser != null
-                      ? FirebaseAuth.instance.currentUser!.displayName
-                          .toString()
+                  _userData != null
+                      ? _userData["user_name"].toString()
                       : "User Name",
                   style: appTheme().textTheme.headline3,
                 ),
@@ -157,18 +167,29 @@ class _UserProfileState extends State<UserProfile> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: Text(
-                  FirebaseAuth.instance.currentUser != null
-                      ? FirebaseAuth.instance.currentUser!.email.toString()
-                      : "User Email",
-                  style: appTheme().textTheme.headline3,
-                ),
+                child: _userData != null
+                    ? _userData["show_email"]
+                        ? const SizedBox()
+                        : Text(
+                            FirebaseAuth.instance.currentUser!.email.toString(),
+                            style: appTheme().textTheme.headline3,
+                          )
+                    : Text(
+                        "User Email",
+                        style: appTheme().textTheme.headline3,
+                      ),
               ),
               Text(
                 "Joine Date",
                 style: appTheme().textTheme.headline3,
               ),
-              const Text("22/1/2022")
+              Text(
+                "${_userData["creation_date"]}",
+                style: appTheme()
+                    .textTheme
+                    .headline4!
+                    .copyWith(color: Colors.black),
+              )
             ],
           ),
         ],
@@ -200,11 +221,14 @@ class _UserProfileState extends State<UserProfile> {
                     GoogleSigninResults.signInCompleted) {
                   _roundedLoadingButtonController.success();
                   await _firebaseDatabase.registerNewUser(
+                    imageUrl:
+                        FirebaseAuth.instance.currentUser!.photoURL.toString(),
                     userEmail:
                         FirebaseAuth.instance.currentUser!.email.toString(),
                     userName: FirebaseAuth.instance.currentUser!.displayName
                         .toString(),
                   );
+                  await _getUserData();
                   _getLandscapeData();
                   setState(() {});
                   ScaffoldMessenger.of(context).showSnackBar(snackBar(
@@ -298,11 +322,11 @@ class _UserProfileState extends State<UserProfile> {
                 style: appTheme().textTheme.headline3!.copyWith(fontSize: 11)),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.favorite,
                   color: Colors.red,
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Text(

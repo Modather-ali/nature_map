@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,6 +10,17 @@ class FirebaseDatabase {
   String usersCollectionPath = "Users";
   String landsCollectionPath = "Landscapes";
 
+  Future<bool> isUserRegistred() async {
+    QuerySnapshot result =
+        await FirebaseFirestore.instance.collection("Users").get();
+
+    final List<DocumentSnapshot> docs = result.docs;
+
+    debugPrint('$docs');
+
+    return docs.contains(FirebaseAuth.instance.currentUser!.email);
+  }
+
   registerNewUser({
     required String userEmail,
     required String userName,
@@ -16,11 +28,15 @@ class FirebaseDatabase {
   }) async {
     final String currentDate =
         "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
+
     DocumentReference documentReference = FirebaseFirestore.instance
         .collection(usersCollectionPath)
         .doc(userEmail);
+
     try {
-      if (documentReference.id.isNotEmpty) {
+      if (await isUserRegistred()) {
+        debugPrint("this user alredy registred");
+      } else {
         await documentReference.set({
           "user_name": userName,
           "profile_image_link": imageUrl,
@@ -29,8 +45,6 @@ class FirebaseDatabase {
           "favorite_landscapes": [],
           "show_email": true
         });
-      } else {
-        debugPrint("this user alredy registred");
       }
     } catch (e) {
       debugPrint("Error in register new user: $e");
@@ -212,6 +226,62 @@ class FirebaseDatabase {
       debugPrint("Update succeeded");
     } catch (e) {
       debugPrint("error while update landscape fans: $e");
+    }
+  }
+
+  Future<String> saveFileAndGetLink(
+    String filePath,
+  ) async {
+    File file = File(filePath);
+    String fileName = basename(filePath);
+
+    Reference firestore =
+        FirebaseStorage.instance.ref("users_profile").child(fileName);
+
+    await firestore.putFile(file);
+
+    String imageUrl = await firestore.getDownloadURL();
+
+    return imageUrl;
+  }
+
+  Future<bool> updateUserProfile({
+    required String imagePath,
+    required String userEmail,
+    required String userName,
+    required String aboutUser,
+    required bool showEmail,
+  }) async {
+    try {
+      final DocumentReference<Map<String, dynamic>> currentUserDocument =
+          FirebaseFirestore.instance
+              .collection(usersCollectionPath)
+              .doc(userEmail);
+
+      if (imagePath == '') {
+        await currentUserDocument.update({
+          "user_name": userName,
+          'about_user': aboutUser,
+          "show_email": showEmail,
+        });
+        debugPrint("Profile update success without profile image");
+      } else {
+        String imageLink = await saveFileAndGetLink(
+          imagePath,
+        );
+        await currentUserDocument.update({
+          'profile_image_link': imageLink,
+          "user_name": userName,
+          'about_user': aboutUser,
+          "show_email": showEmail,
+        });
+        debugPrint("Profile update success");
+      }
+      return true;
+    } catch (e) {
+      print('Error in profile update : $e');
+      debugPrint("Profile failed");
+      return false;
     }
   }
 }

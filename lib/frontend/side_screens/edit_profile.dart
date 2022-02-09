@@ -4,8 +4,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/support_screens/image_view.dart';
+import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/enums.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({Key? key}) : super(key: key);
@@ -15,16 +17,27 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _nameTextEditingController =
+      TextEditingController();
+  final TextEditingController _aboutTextEditingController =
+      TextEditingController();
+
+  final RoundedLoadingButtonController _roundedLoadingButtonController =
+      RoundedLoadingButtonController();
+
   var _userData;
 
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
+
+  final String _imagePath = '';
+  late bool _showEmail;
 
   _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
       _userData = await _firebaseDatabase.getUserData(
           userEmail: FirebaseAuth.instance.currentUser!.email.toString());
-      _textEditingController.text = _userData["user_name"];
+      _nameTextEditingController.text = _userData["user_name"];
+      _showEmail = _userData['show_email'];
       setState(() {});
     }
   }
@@ -58,6 +71,54 @@ class _EditProfileState extends State<EditProfile> {
     return ListView(
       padding: const EdgeInsets.only(top: 50, right: 15, left: 15),
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 150,
+              child: RoundedLoadingButton(
+                  child: const Text("Save & Back"),
+                  controller: _roundedLoadingButtonController,
+                  color: appTheme().colorScheme.primary,
+                  successColor: Colors.green,
+                  errorColor: Colors.red,
+                  onPressed: () async {
+                    try {
+                      bool result = await _firebaseDatabase.updateUserProfile(
+                        imagePath: _imagePath,
+                        userEmail:
+                            FirebaseAuth.instance.currentUser!.email.toString(),
+                        userName: _nameTextEditingController.text,
+                        aboutUser: _aboutTextEditingController.text,
+                        showEmail: _showEmail,
+                      );
+
+                      if (result) {
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                            message: "Profile update successful",
+                            color: Colors.green));
+                        _roundedLoadingButtonController.success();
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                            message: "Profile update failed",
+                            color: Colors.green));
+                        _roundedLoadingButtonController.error();
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                          message: "Profile update failed",
+                          color: Colors.green));
+                      _roundedLoadingButtonController.error();
+                      print('Error in profile update : $e');
+                    }
+                  }),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 10,
+        ),
         CircleAvatar(
           backgroundColor: Colors.black,
           radius: 80,
@@ -135,20 +196,47 @@ class _EditProfileState extends State<EditProfile> {
           height: 10,
         ),
         TextField(
-          controller: _textEditingController,
-          decoration: const InputDecoration(),
+          controller: _nameTextEditingController,
+          decoration: const InputDecoration(
+            hintText: "Your name",
+          ),
         ),
         const SizedBox(
-          height: 10,
+          height: 15,
+        ),
+        // TextField(
+        //   controller: _aboutTextEditingController,
+        //   maxLength: 124,
+        //   decoration: const InputDecoration(
+        //     hintText: "About you",
+        //   ),
+        // ),
+        const SizedBox(
+          height: 15,
         ),
         CheckboxListTile(
-            selectedTileColor: Colors.green,
+            activeColor: Colors.green,
+            isThreeLine: true,
             title: Text(
-              FirebaseAuth.instance.currentUser!.email.toString(),
-              style: appTheme().textTheme.headline3,
+              "Show my Email to the others",
+              style: appTheme().textTheme.headline2!.copyWith(
+                    color: Colors.black,
+                    fontSize: 14,
+                  ),
             ),
-            value: _userData['show_email'],
-            onChanged: (isChanged) {})
+            subtitle: Text(
+              FirebaseAuth.instance.currentUser!.email.toString(),
+              style: _showEmail
+                  ? appTheme().textTheme.headline3
+                  : appTheme().textTheme.headline4,
+            ),
+            value: _showEmail,
+            onChanged: (isChanged) {
+              setState(() {
+                _showEmail = !_showEmail;
+              });
+              debugPrint("$_showEmail");
+            })
       ],
     );
   }

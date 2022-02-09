@@ -27,7 +27,7 @@ class _UserProfileState extends State<UserProfile> {
   final RoundedLoadingButtonController _roundedLoadingButtonController =
       RoundedLoadingButtonController();
 
-  var _userData;
+  Map<String, dynamic> _userData = {};
 
   _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
@@ -38,7 +38,7 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   _getProfileImage() {
-    if (_userData != null) {
+    if (_userData.isNotEmpty) {
       return NetworkImage(_userData["profile_image_link"].toString());
     } else {
       return const AssetImage("assets/images/profile_avatar.png");
@@ -117,6 +117,7 @@ class _UserProfileState extends State<UserProfile> {
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
                   onPressed: () {
@@ -158,7 +159,7 @@ class _UserProfileState extends State<UserProfile> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: Text(
-                  _userData != null
+                  _userData.isNotEmpty
                       ? _userData["user_name"].toString()
                       : "User Name",
                   style: appTheme().textTheme.headline3,
@@ -167,13 +168,13 @@ class _UserProfileState extends State<UserProfile> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: _userData != null
+                child: _userData.isNotEmpty
                     ? _userData["show_email"]
-                        ? const SizedBox()
-                        : Text(
+                        ? Text(
                             FirebaseAuth.instance.currentUser!.email.toString(),
                             style: appTheme().textTheme.headline3,
                           )
+                        : const SizedBox()
                     : Text(
                         "User Email",
                         style: appTheme().textTheme.headline3,
@@ -184,7 +185,9 @@ class _UserProfileState extends State<UserProfile> {
                 style: appTheme().textTheme.headline3,
               ),
               Text(
-                "${_userData["creation_date"]}",
+                _userData.isNotEmpty
+                    ? "${_userData["creation_date"]}"
+                    : 'dd/mm/yyyy',
                 style: appTheme()
                     .textTheme
                     .headline4!

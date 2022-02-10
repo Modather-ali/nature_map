@@ -8,10 +8,12 @@ import 'package:nature_map/frontend/side_screens/user_discoveries.dart';
 import 'package:nature_map/frontend/side_screens/user_favorite.dart';
 import 'package:nature_map/frontend/side_screens/user_profile.dart';
 import 'package:nature_map/frontend/start_screen.dart';
+import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +42,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: appTheme(),
-        home: HomePage(),
+        home: const HomePage(),
       ),
     );
   }
@@ -95,7 +97,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return ZoomDrawer(
       //  controller: _drawerController,
-      menuScreen: const MenuScreen(),
+      menuScreen: MenuScreen(),
       mainScreen: const StartScreen(),
       borderRadius: 24.0,
       showShadow: true,
@@ -110,7 +112,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class MenuScreen extends StatelessWidget {
-  const MenuScreen({Key? key}) : super(key: key);
+  MenuScreen({Key? key}) : super(key: key);
   _getProfileImage() {
     if (FirebaseAuth.instance.currentUser != null) {
       return NetworkImage(
@@ -119,6 +121,9 @@ class MenuScreen extends StatelessWidget {
       return const AssetImage("assets/images/profile_avatar.png");
     }
   }
+
+  final RoundedLoadingButtonController _roundedLoadingButtonController =
+      RoundedLoadingButtonController();
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +144,7 @@ class MenuScreen extends StatelessWidget {
                     onTap: () {
                       //  context.read<ProviderMethods>().showState();
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => UserProfile()));
+                          builder: (context) => const UserProfile()));
                     },
                     child: Hero(
                       tag: "profile avatar",
@@ -157,8 +162,8 @@ class MenuScreen extends StatelessWidget {
             ),
             ListTile(
               onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => UserProfile()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const UserProfile()));
               },
               leading: const Icon(
                 Icons.person_outline,
@@ -208,20 +213,34 @@ class MenuScreen extends StatelessWidget {
                 style: appTheme().textTheme.headline2,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
             Row(
               children: [
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      // side: BorderSide(),
-                      primary: Color(0xFF1b3a4b),
-                    ),
-                    onPressed: () {
-                      logOut();
+                SizedBox(
+                  width: 120,
+                  child: RoundedLoadingButton(
+                    child: const Text("Log out"),
+                    controller: _roundedLoadingButtonController,
+                    color: const Color(0xFF1b3a4b),
+                    successColor: Colors.green,
+                    errorColor: Colors.red,
+                    onPressed: () async {
+                      bool result = await logOut();
+                      if (result) {
+                        _roundedLoadingButtonController.success();
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) => const StartScreen()));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                            message: "Error happened, lop out failed",
+                            color: Colors.green));
+                        _roundedLoadingButtonController.error();
+                      }
                     },
-                    child: const Text("Log out")),
+                  ),
+                ),
               ],
             )
           ],

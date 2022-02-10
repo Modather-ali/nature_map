@@ -12,6 +12,7 @@ import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/enums.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:timer_builder/timer_builder.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({Key? key}) : super(key: key);
@@ -133,13 +134,13 @@ class _UserProfileState extends State<UserProfile> {
               CircleAvatar(
                 backgroundColor: Colors.black,
                 radius: 50,
-                child: Hero(
-                  tag: "profile avatar",
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const EditProfile()));
-                    },
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const EditProfile()));
+                  },
+                  child: Hero(
+                    tag: "profile avatar",
                     child: CircleAvatar(
                       foregroundImage: _getProfileImage(),
                       radius: 48,
@@ -158,11 +159,17 @@ class _UserProfileState extends State<UserProfile> {
             children: [
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: Text(
-                  _userData.isNotEmpty
-                      ? _userData["user_name"].toString()
-                      : "User Name",
-                  style: appTheme().textTheme.headline3,
+                child: TimerBuilder.periodic(
+                  const Duration(seconds: 1),
+                  builder: (context) {
+                    _getUserData();
+                    return Text(
+                      _userData.isNotEmpty
+                          ? _userData["user_name"].toString()
+                          : "User Name",
+                      style: appTheme().textTheme.headline3,
+                    );
+                  },
                 ),
               ),
               Container(
@@ -267,30 +274,31 @@ class _UserProfileState extends State<UserProfile> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: DottedBorder(
-                  radius: const Radius.circular(10),
-                  borderType: BorderType.RRect,
-                  strokeCap: StrokeCap.round,
-                  dashPattern: const [10, 10],
-                  color: Colors.grey,
-                  child: InkWell(
-                    onTap: () {
-                      print("Adding new landscape...");
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const AddLandscape()));
-                    },
-                    child: SizedBox(
-                      height: MediaQuery.of(context).orientation ==
-                              Orientation.landscape
-                          ? MediaQuery.of(context).size.width * 0.5
-                          : MediaQuery.of(context).size.height * 0.25,
-                      width: MediaQuery.of(context).size.width / 3.5,
-                      child: const Icon(
-                        Icons.add,
-                        size: 35,
-                        color: Colors.grey,
-                      ),
+                radius: const Radius.circular(10),
+                borderType: BorderType.RRect,
+                strokeCap: StrokeCap.round,
+                dashPattern: const [10, 10],
+                color: Colors.grey,
+                child: InkWell(
+                  onTap: () {
+                    print("Adding new landscape...");
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const AddLandscape()));
+                  },
+                  child: SizedBox(
+                    height: MediaQuery.of(context).orientation ==
+                            Orientation.landscape
+                        ? MediaQuery.of(context).size.width * 0.5
+                        : MediaQuery.of(context).size.height * 0.25,
+                    width: MediaQuery.of(context).size.width / 3.5,
+                    child: const Icon(
+                      Icons.add,
+                      size: 35,
+                      color: Colors.grey,
                     ),
-                  )),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

@@ -11,14 +11,18 @@ class FirebaseDatabase {
   String landsCollectionPath = "Landscapes";
 
   Future<bool> isUserRegistred() async {
+    List docsId = [];
+
     QuerySnapshot result =
         await FirebaseFirestore.instance.collection("Users").get();
 
-    final List<DocumentSnapshot> docs = result.docs;
+    for (var queryDocumentSnapshot in result.docs) {
+      docsId.add(queryDocumentSnapshot.id);
+    }
 
-    debugPrint('$docs');
+    debugPrint('$docsId');
 
-    return docs.contains(FirebaseAuth.instance.currentUser!.email);
+    return docsId.contains(FirebaseAuth.instance.currentUser!.email);
   }
 
   registerNewUser({

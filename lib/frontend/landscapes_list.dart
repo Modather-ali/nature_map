@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:like_button/like_button.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/map_screen.dart';
@@ -30,7 +29,7 @@ class _LandscapesListState extends State<LandscapesList> {
   var _position;
   List<QueryDocumentSnapshot<Object?>> _landscapesDataList = [];
 
-  List<bool> _isLoading = [];
+  final List<bool> _isLoading = [];
 
   late Map<String, dynamic> _userData = {};
 
@@ -301,7 +300,7 @@ class _LandscapesListState extends State<LandscapesList> {
       elevation: 18,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Text("$tag"),
+        child: Text(tag),
       ),
       color: cardColor,
     );

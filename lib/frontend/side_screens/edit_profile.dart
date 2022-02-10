@@ -28,8 +28,7 @@ class _EditProfileState extends State<EditProfile> {
   var _userData;
 
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
-
-  final String _imagePath = '';
+  String _imagePath = '';
   late bool _showEmail;
 
   _getUserData() async {
@@ -197,6 +196,7 @@ class _EditProfileState extends State<EditProfile> {
         ),
         TextField(
           controller: _nameTextEditingController,
+          maxLength: 20,
           decoration: const InputDecoration(
             hintText: "Your name",
           ),
@@ -256,6 +256,9 @@ class _EditProfileState extends State<EditProfile> {
                 imageQuality: 1,
               );
               if (_selectedImage != null) {
+                setState(() {
+                  _imagePath = _selectedImage.path;
+                });
                 Navigator.pop(context);
               }
             } catch (e) {

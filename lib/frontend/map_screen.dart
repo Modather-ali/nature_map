@@ -5,14 +5,16 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
+import 'package:nature_map/frontend/support_screens/image_view.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
+import 'package:nature_map/methods/enums.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
   final QueryDocumentSnapshot landscapeData;
-  MapScreen({Key? key, required this.landscapeData}) : super(key: key);
+  const MapScreen({Key? key, required this.landscapeData}) : super(key: key);
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -136,7 +138,18 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               ...[
                 for (String imageUrl in widget.landscapeData["land_images"])
-                  Image.network(imageUrl)
+                  InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ImageView(
+                              imageType: ImageType.networkImage,
+                              imagePath: imageUrl,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Image.network(imageUrl))
               ]
             ],
           ),

@@ -9,7 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_management/detect_location.dart';
+import 'package:nature_map/frontend/support_screens/image_view.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
+import 'package:nature_map/methods/enums.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +39,13 @@ class _AddLandscapeState extends State<AddLandscape> {
   final List<String> landTags1 = ["Mountain", "Sea", "Desert"];
   final List<String> landTags2 = ["Volcano", "Forest", "Civilization"];
 
+  // final List<String> _landImagesList = [
+  //   "assets/images/mountain.jpg",
+  //   "assets/images/sea.jpg",
+  //   "assets/images/desert.jpg",
+  //   "assets/images/volcano.jpg",
+  // ];
+
   _getPlacemark(latitude, longitude) async {
     _placemark = await placemarkFromCoordinates(latitude, longitude);
     _cameraPosition =
@@ -49,15 +58,25 @@ class _AddLandscapeState extends State<AddLandscape> {
     // bool serviceEnabled;
     LocationPermission permission;
 
+    bool _serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!_serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar(
+          message: "Please active location service", color: Colors.red));
+    }
+
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(snackBar(
+            message: "Please active location service", color: Colors.red));
         return Future.error('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar(
+          message: "Please active location service", color: Colors.red));
       // Permissions are denied forever, handle appropriately.
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
@@ -251,13 +270,42 @@ class _AddLandscapeState extends State<AddLandscape> {
           child: Row(
             children: [
               ...[
-                for (File item in landImages)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.file(item),
+                for (File file in landImages)
+                  Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ImageView(
+                                    imageType: ImageType.fileImage,
+                                    imagePath: file,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Image.file(file)),
+                      ),
+                      Positioned(
+                        top: 3,
+                        right: 5,
+                        child: IconButton(
+                          onPressed: () {
+                            landImages.remove(file);
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ],
                   )
               ],
-              _selectImages(landImages: landImages),
+              //  _selectImages(landImages: landImages),
             ],
           ),
         ),
@@ -332,6 +380,7 @@ class _AddLandscapeState extends State<AddLandscape> {
       children: [
         FloatingActionButton(
           onPressed: () async {
+            await Permission.storage.request();
             try {
               final XFile? _selectedImage = await ImagePicker().pickImage(
                 source: imageSource,

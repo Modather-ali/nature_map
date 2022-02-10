@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:nature_map/app_theme.dart';
+import 'package:nature_map/frontend/side_screens/about_app.dart';
 import 'package:nature_map/frontend/side_screens/user_discoveries.dart';
 import 'package:nature_map/frontend/side_screens/user_favorite.dart';
 import 'package:nature_map/frontend/side_screens/user_profile.dart';
@@ -203,7 +204,10 @@ class MenuScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const AboutApp()));
+              },
               leading: const Icon(
                 Icons.info_outline,
                 color: Colors.white,

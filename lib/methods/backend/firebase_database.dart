@@ -252,8 +252,8 @@ class FirebaseDatabase {
   Future<bool> updateUserProfile({
     required String imagePath,
     required String userEmail,
-    required String userName,
-    required String aboutUser,
+    String userName = "",
+    String aboutUser = "",
     required bool showEmail,
   }) async {
     try {
@@ -275,11 +275,8 @@ class FirebaseDatabase {
         );
         await currentUserDocument.update({
           'profile_image_link': imageLink,
-          "user_name": userName,
-          'about_user': aboutUser,
-          "show_email": showEmail,
         });
-        debugPrint("Profile update success");
+        debugPrint("Profile image update success");
       }
       return true;
     } catch (e) {

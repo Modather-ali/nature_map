@@ -13,40 +13,41 @@ const List<Color> kDefaultRainbowColors = [
 
 ThemeData appTheme() {
   return ThemeData(
-    colorScheme: const ColorScheme.light(
-      primary: Color(0xFF52b788),
-      secondary: Color(0xFF80ffdb),
-    ),
-    textTheme: TextTheme(
-      headline1: GoogleFonts.kaushanScript(
-        textStyle: const TextStyle(
-          letterSpacing: 2,
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+      colorScheme: const ColorScheme.light(
+        primary: Color(0xFF52b788),
+        secondary: Color(0xFF80ffdb),
+      ),
+      textTheme: TextTheme(
+        headline1: GoogleFonts.kaushanScript(
+          textStyle: const TextStyle(
+            letterSpacing: 2,
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        headline2: GoogleFonts.ibmPlexMono(
+          textStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+        headline3: GoogleFonts.ibmPlexMono(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        headline4: GoogleFonts.ibmPlexMono(
+          textStyle: const TextStyle(
+            color: Colors.grey,
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
         ),
       ),
-      headline2: GoogleFonts.ibmPlexMono(
-        textStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w300,
-        ),
-      ),
-      headline3: GoogleFonts.ibmPlexMono(
-        textStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      headline4: GoogleFonts.ibmPlexMono(
-        textStyle: const TextStyle(
-          color: Colors.grey,
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-    ),
-  );
+      appBarTheme:
+          AppBarTheme(backgroundColor: const Color(0xFF52b788).withAlpha(200)));
 }

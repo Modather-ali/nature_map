@@ -19,7 +19,7 @@ class UserFavorite extends StatefulWidget {
 }
 
 class _UserFavoriteState extends State<UserFavorite> {
-  List<bool> _isLoading = [];
+  final List<bool> _isLoading = [];
   double _distanceBetween = 0.0;
   late Map<String, dynamic> _userData = {};
 
@@ -97,6 +97,7 @@ class _UserFavoriteState extends State<UserFavorite> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text("Your Favorite"),
       ),
@@ -263,7 +264,7 @@ class _UserFavoriteState extends State<UserFavorite> {
       elevation: 18,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Text("$tag"),
+        child: Text(tag),
       ),
       color: cardColor,
     );

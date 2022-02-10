@@ -96,8 +96,9 @@ class _LandscapesListState extends State<LandscapesList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: widget.color,
+        backgroundColor: widget.color.withAlpha(200),
         actions: [
           IconButton(
               onPressed: () {

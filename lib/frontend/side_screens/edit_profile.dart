@@ -7,6 +7,7 @@ import 'package:nature_map/frontend/support_screens/image_view.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/enums.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class EditProfile extends StatefulWidget {
@@ -29,7 +30,9 @@ class _EditProfileState extends State<EditProfile> {
 
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
   String _imagePath = '';
+
   late bool _showEmail;
+  bool _isImageUpdateing = false;
 
   _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
@@ -93,6 +96,7 @@ class _EditProfileState extends State<EditProfile> {
                       );
 
                       if (result) {
+                        _imagePath = '';
                         ScaffoldMessenger.of(context).showSnackBar(snackBar(
                             message: "Profile update successful",
                             color: Colors.green));
@@ -123,72 +127,13 @@ class _EditProfileState extends State<EditProfile> {
           radius: 80,
           child: Hero(
             tag: "profile avatar",
-            child: Stack(
-              children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ImageView(
-                          imageType: ImageType.networkImage,
-                          imagePath: _userData["profile_image_link"].toString(),
-                        ),
-                      ),
-                    );
-                  },
-                  child: CircleAvatar(
-                    foregroundImage: NetworkImage(
-                      _userData["profile_image_link"].toString(),
-                    ),
-                    radius: 78,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: IconButton(
-                    iconSize: 35,
-                    //color: const Color(0xFF52b788),
-
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            alignment: Alignment.center,
-                            height: MediaQuery.of(context).size.height / 4,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text(
-                                  "Change your profile photo:",
-                                  style: appTheme().textTheme.headline4,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    _choiceImageButton(
-                                        source: "From Gallery",
-                                        imageSource: ImageSource.gallery,
-                                        iconData: Icons.add_a_photo_outlined),
-                                    _choiceImageButton(
-                                        source: "From Camera",
-                                        imageSource: ImageSource.camera,
-                                        iconData: Icons.image_outlined),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    icon: const Icon(Icons.add_a_photo),
-                  ),
-                )
-              ],
-            ),
+            child: _isImageUpdateing
+                ? const LoadingIndicator(
+                    indicatorType: Indicator.ballScaleMultiple,
+                    colors: kDefaultRainbowColors,
+                    strokeWidth: 4.0,
+                  )
+                : _profileImage(),
           ),
         ),
         const SizedBox(
@@ -241,6 +186,74 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
+  Widget _profileImage() {
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ImageView(
+                  imageType: ImageType.networkImage,
+                  imagePath: _userData["profile_image_link"].toString(),
+                ),
+              ),
+            );
+          },
+          child: CircleAvatar(
+            foregroundImage: NetworkImage(
+              _userData["profile_image_link"].toString(),
+            ),
+            radius: 78,
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: IconButton(
+            iconSize: 35,
+            //color: const Color(0xFF52b788),
+
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return Container(
+                    alignment: Alignment.center,
+                    height: MediaQuery.of(context).size.height / 4,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(
+                          "Change your profile photo:",
+                          style: appTheme().textTheme.headline4,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _choiceImageButton(
+                                source: "From Gallery",
+                                imageSource: ImageSource.gallery,
+                                iconData: Icons.add_a_photo_outlined),
+                            _choiceImageButton(
+                                source: "From Camera",
+                                imageSource: ImageSource.camera,
+                                iconData: Icons.image_outlined),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.add_a_photo),
+          ),
+        )
+      ],
+    );
+  }
+
   Widget _choiceImageButton(
       {required String source,
       required ImageSource imageSource,
@@ -250,16 +263,28 @@ class _EditProfileState extends State<EditProfile> {
       children: [
         FloatingActionButton(
           onPressed: () async {
+            await Permission.storage.request();
             try {
               final XFile? _selectedImage = await ImagePicker().pickImage(
                 source: imageSource,
                 imageQuality: 1,
               );
               if (_selectedImage != null) {
+                Navigator.pop(context);
                 setState(() {
                   _imagePath = _selectedImage.path;
+                  _isImageUpdateing = true;
                 });
-                Navigator.pop(context);
+                await _firebaseDatabase.updateUserProfile(
+                  imagePath: _imagePath,
+                  userEmail:
+                      FirebaseAuth.instance.currentUser!.email.toString(),
+                  showEmail: _showEmail,
+                );
+                await _getUserData();
+                setState(() {
+                  _isImageUpdateing = false;
+                });
               }
             } catch (e) {
               debugPrint("error in choice image: $e");

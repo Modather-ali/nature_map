@@ -384,7 +384,7 @@ class _AddLandscapeState extends State<AddLandscape> {
             try {
               final XFile? _selectedImage = await ImagePicker().pickImage(
                 source: imageSource,
-                imageQuality: 1,
+                imageQuality: 100,
               );
               if (_selectedImage != null) {
                 Navigator.pop(context);

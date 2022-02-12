@@ -24,7 +24,8 @@ class LandscapesList extends StatefulWidget {
   _LandscapesListState createState() => _LandscapesListState();
 }
 
-class _LandscapesListState extends State<LandscapesList> {
+class _LandscapesListState extends State<LandscapesList>
+    with SingleTickerProviderStateMixin {
   double _distanceBetween = 0.0;
   var _position;
   List<QueryDocumentSnapshot<Object?>> _landscapesDataList = [];
@@ -36,6 +37,10 @@ class _LandscapesListState extends State<LandscapesList> {
   User? user = FirebaseAuth.instance.currentUser;
 
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
+
+  // late AnimationController _animationController;
+
+  // bool isListView = true;
 
   _getDate() async {
     _landscapesDataList = await _firebaseDatabase.getLandscapesData(
@@ -87,6 +92,8 @@ class _LandscapesListState extends State<LandscapesList> {
 
   @override
   void initState() {
+    // _animationController =
+    //     AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     _getDate();
     _getCurrentPosition();
 
@@ -99,13 +106,22 @@ class _LandscapesListState extends State<LandscapesList> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: widget.color.withAlpha(200),
-        actions: [
-          IconButton(
-              onPressed: () {
-                debugPrint(_landscapesDataList[0].id.toString());
-              },
-              icon: const Icon(Icons.clear_all))
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () {
+        //         setState(() {
+        //           isListView = !isListView;
+        //         });
+        //         if (!isListView) {
+        //           _animationController.reverse();
+        //         } else {
+        //           _animationController.forward();
+        //         }
+        //       },
+        //       icon: AnimatedIcon(
+        //           icon: AnimatedIcons.list_view,
+        //           progress: _animationController)),
+        // ],
         title: Consumer<DifferentLandsapesValus>(
           builder: (context, providerValue, child) {
             return GestureDetector(
@@ -177,90 +193,82 @@ class _LandscapesListState extends State<LandscapesList> {
         height: MediaQuery.of(context).orientation == Orientation.landscape
             ? MediaQuery.of(context).size.height * 0.7
             : MediaQuery.of(context).size.height / 3,
-        child: Row(
+        child: Stack(
           children: [
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(left: 3, top: 2, right: 5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+            OpenContainer(
+              transitionDuration: const Duration(milliseconds: 650),
+              closedElevation: 8,
+              transitionType: ContainerTransitionType.fade,
+              closedBuilder: (context, closedBuilder) {
+                return Row(
                   children: [
-                    _favoriteButton(
-                      landscapeData: landscapeData,
-                      index: index,
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).orientation ==
-                              Orientation.landscape
-                          ? MediaQuery.of(context).size.height * 0.4
-                          : MediaQuery.of(context).size.height / 7,
-                      width: MediaQuery.of(context).orientation ==
-                              Orientation.landscape
-                          ? MediaQuery.of(context).size.width * 0.5
-                          : MediaQuery.of(context).size.width / 4,
-                      child: Image.network(
-                        landscapeData["land_images"][0],
-                        fit: BoxFit.fill,
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.topCenter,
+                        margin:
+                            const EdgeInsets.only(left: 3, top: 45, right: 5),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).orientation ==
+                                  Orientation.landscape
+                              ? MediaQuery.of(context).size.height * 0.4
+                              : MediaQuery.of(context).size.height / 7,
+                          width: MediaQuery.of(context).orientation ==
+                                  Orientation.landscape
+                              ? MediaQuery.of(context).size.width * 0.5
+                              : MediaQuery.of(context).size.width / 4,
+                          child: Image.network(
+                            landscapeData["land_images"][0],
+                            fit: BoxFit.fill,
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 5,
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.65,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            landscapeData["land_name"].toString(),
+                            style: appTheme().textTheme.headline3,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "country / area",
+                            style: appTheme().textTheme.headline4,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "$_distanceBetween".split(".")[0] +
+                                "." +
+                                "$_distanceBetween".split(".")[0][0] +
+                                " meters\nfar away",
+                            style: appTheme().textTheme.headline4,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          _tagsCard(landscapeData["tages"]),
+                        ],
+                      ),
                     ),
-                    OpenContainer(
-                        transitionDuration: const Duration(milliseconds: 650),
-                        closedElevation: 8,
-                        transitionType: ContainerTransitionType.fade,
-                        closedBuilder: (context, closedBuilder) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "View",
-                              style: appTheme().textTheme.headline3,
-                            ),
-                          );
-                        },
-                        openBuilder: (context, openBuilder) {
-                          return MapScreen(
-                            landscapeData: landscapeData,
-                          );
-                        })
                   ],
-                ),
-              ),
+                );
+              },
+              openBuilder: (context, openBuilder) {
+                return MapScreen(
+                  landscapeData: landscapeData,
+                );
+              },
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.65,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    landscapeData["land_name"].toString(),
-                    style: appTheme().textTheme.headline3,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "country / area",
-                    style: appTheme().textTheme.headline4,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "$_distanceBetween".split(".")[0] +
-                        "." +
-                        "$_distanceBetween".split(".")[0][0] +
-                        " meters\nfar away",
-                    style: appTheme().textTheme.headline4,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _tagsCard(landscapeData["tages"]),
-                ],
-              ),
+            _favoriteButton(
+              landscapeData: landscapeData,
+              index: index,
             ),
           ],
         ),

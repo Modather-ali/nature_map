@@ -19,6 +19,7 @@ class UserFavorite extends StatefulWidget {
 }
 
 class _UserFavoriteState extends State<UserFavorite> {
+   
   final List<bool> _isLoading = [];
   double _distanceBetween = 0.0;
   late Map<String, dynamic> _userData = {};

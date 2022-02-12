@@ -11,10 +11,17 @@ class ImageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.black.withAlpha(30),
+      ),
       body: PhotoView(
         imageProvider: myImageProvider(),
         enableRotation: true,
         enablePanAlways: true,
+        // onTapDown: (context, tapDownDetails, photoViewControllerValue) {
+        //   Navigator.pop(context);
+        // },
       ),
     );
   }

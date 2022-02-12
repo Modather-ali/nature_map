@@ -5,6 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nature_map/app_theme.dart';
+import 'package:nature_map/frontend/side_screens/user_profile.dart';
 import 'package:nature_map/frontend/support_screens/image_view.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
@@ -34,7 +35,7 @@ class _MapScreenState extends State<MapScreen> {
   _getDate() async {
     if (user != null) {
       _userData = await _firebaseDatabase.getUserData(
-          userEmail: user!.email.toString());
+          userEmail: widget.landscapeData["added by"]);
     }
 
     setState(() {});
@@ -207,6 +208,25 @@ class _MapScreenState extends State<MapScreen> {
             const SizedBox(
               height: 10,
             ),
+            Row(
+              children: [
+                Text(
+                  "Added by  ",
+                  style: appTheme().textTheme.headline4,
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => UserProfile(
+                            userEmail: widget.landscapeData['added by'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text("${_userData["user_name"]}"))
+              ],
+            )
           ],
         )
       ],

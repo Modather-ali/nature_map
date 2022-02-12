@@ -15,7 +15,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:timer_builder/timer_builder.dart';
 
 class UserProfile extends StatefulWidget {
-  const UserProfile({Key? key}) : super(key: key);
+  final String userEmail;
+  const UserProfile({Key? key, this.userEmail = ''}) : super(key: key);
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -30,10 +31,19 @@ class _UserProfileState extends State<UserProfile> {
 
   Map<String, dynamic> _userData = {};
 
+  String userEmail = '';
+
+  bool _isCurrentUser = true;
+
   _getUserData() async {
+    _isCurrentUser = widget.userEmail == '';
+
+    userEmail = _isCurrentUser
+        ? FirebaseAuth.instance.currentUser!.email.toString()
+        : widget.userEmail;
+
     if (FirebaseAuth.instance.currentUser != null) {
-      _userData = await _firebaseDatabase.getUserData(
-          userEmail: FirebaseAuth.instance.currentUser!.email.toString());
+      _userData = await _firebaseDatabase.getUserData(userEmail: userEmail);
       setState(() {});
     }
   }
@@ -50,7 +60,7 @@ class _UserProfileState extends State<UserProfile> {
     try {
       if (FirebaseAuth.instance.currentUser != null) {
         _landsapesDataList = await _firebaseDatabase.getLandDataForThisUser(
-            userEmail: FirebaseAuth.instance.currentUser!.email.toString());
+            userEmail: userEmail);
 
         setState(() {});
       } else {
@@ -81,7 +91,9 @@ class _UserProfileState extends State<UserProfile> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   child: Text(
-                    "landscapes discovered by you:",
+                    _isCurrentUser
+                        ? "landscapes discovered by you:"
+                        : "landscapes discovered this user",
                     style: appTheme().textTheme.headline4,
                   ),
                 ),
@@ -124,8 +136,8 @@ class _UserProfileState extends State<UserProfile> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  icon: const Icon(
-                    Icons.home_outlined,
+                  icon: Icon(
+                    _isCurrentUser ? Icons.home_outlined : Icons.arrow_back,
                     size: 30,
                   )),
               const SizedBox(
@@ -136,8 +148,13 @@ class _UserProfileState extends State<UserProfile> {
                 radius: 50,
                 child: InkWell(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const EditProfile()));
+                    if (_isCurrentUser) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfile(),
+                        ),
+                      );
+                    }
                   },
                   child: Hero(
                     tag: "profile avatar",
@@ -178,7 +195,7 @@ class _UserProfileState extends State<UserProfile> {
                 child: _userData.isNotEmpty
                     ? _userData["show_email"]
                         ? Text(
-                            FirebaseAuth.instance.currentUser!.email.toString(),
+                            userEmail,
                             style: appTheme().textTheme.headline3,
                           )
                         : const SizedBox()
@@ -271,35 +288,37 @@ class _UserProfileState extends State<UserProfile> {
               for (var landscape in _landsapesDataList)
                 _landscapeCard(landscape)
             ],
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DottedBorder(
-                radius: const Radius.circular(10),
-                borderType: BorderType.RRect,
-                strokeCap: StrokeCap.round,
-                dashPattern: const [10, 10],
-                color: Colors.grey,
-                child: InkWell(
-                  onTap: () {
-                    print("Adding new landscape...");
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const AddLandscape()));
-                  },
-                  child: SizedBox(
-                    height: MediaQuery.of(context).orientation ==
-                            Orientation.landscape
-                        ? MediaQuery.of(context).size.width * 0.5
-                        : MediaQuery.of(context).size.height * 0.25,
-                    width: MediaQuery.of(context).size.width / 3.5,
-                    child: const Icon(
-                      Icons.add,
-                      size: 35,
+            _isCurrentUser
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DottedBorder(
+                      radius: const Radius.circular(10),
+                      borderType: BorderType.RRect,
+                      strokeCap: StrokeCap.round,
+                      dashPattern: const [10, 10],
                       color: Colors.grey,
+                      child: InkWell(
+                        onTap: () {
+                          print("Adding new landscape...");
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const AddLandscape()));
+                        },
+                        child: SizedBox(
+                          height: MediaQuery.of(context).orientation ==
+                                  Orientation.landscape
+                              ? MediaQuery.of(context).size.width * 0.5
+                              : MediaQuery.of(context).size.height * 0.25,
+                          width: MediaQuery.of(context).size.width / 3.5,
+                          child: const Icon(
+                            Icons.add,
+                            size: 35,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ),
+                  )
+                : SizedBox(),
           ],
         ),
       ],

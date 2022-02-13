@@ -33,6 +33,7 @@ class _EditProfileState extends State<EditProfile> {
 
   late bool _showEmail;
   bool _isImageUpdateing = false;
+  // bool _isLoading = true;
 
   _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
@@ -160,28 +161,31 @@ class _EditProfileState extends State<EditProfile> {
           height: 15,
         ),
         CheckboxListTile(
-            activeColor: Colors.green,
-            isThreeLine: true,
-            title: Text(
-              "Show my Email to the others",
-              style: appTheme().textTheme.headline2!.copyWith(
-                    color: Colors.black,
-                    fontSize: 14,
-                  ),
-            ),
-            subtitle: Text(
-              FirebaseAuth.instance.currentUser!.email.toString(),
-              style: _showEmail
-                  ? appTheme().textTheme.headline3
-                  : appTheme().textTheme.headline4,
-            ),
-            value: _showEmail,
-            onChanged: (isChanged) {
-              setState(() {
-                _showEmail = !_showEmail;
-              });
-              debugPrint("$_showEmail");
-            })
+          activeColor: Colors.green,
+          isThreeLine: true,
+          title: Text(
+            "Show my Email to the others",
+            style: appTheme().textTheme.headline2!.copyWith(
+                  color: Colors.black,
+                  fontSize: 14,
+                ),
+          ),
+          subtitle: Text(
+            FirebaseAuth.instance.currentUser!.email.toString(),
+            style: _showEmail
+                ? appTheme().textTheme.headline3
+                : appTheme().textTheme.headline4,
+          ),
+          value: _showEmail,
+          onChanged: (isChanged) {
+            setState(() {
+              _showEmail = !_showEmail;
+            });
+            debugPrint("$_showEmail");
+          },
+        ),
+        Divider(),
+       // _isLoading ? LinearProgressIndicator() : _deleteButton(),
       ],
     );
   }
@@ -300,6 +304,48 @@ class _EditProfileState extends State<EditProfile> {
           style: appTheme().textTheme.headline3!.copyWith(fontSize: 14),
         )
       ],
+    );
+  }
+
+  Widget _deleteButton() {
+    return ListTile(
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(
+                  "This will remove all of your data",
+                  style: appTheme().textTheme.headline4,
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Cloce",
+                        style: appTheme()
+                            .textTheme
+                            .headline4!
+                            .copyWith(color: Colors.green),
+                      )),
+                  TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "accept",
+                        style: appTheme()
+                            .textTheme
+                            .headline4!
+                            .copyWith(color: Colors.red),
+                      )),
+                ],
+              );
+            });
+      },
+      title: Text(
+        "Delete my accont",
+        style: appTheme().textTheme.headline4!.copyWith(color: Colors.red),
+      ),
+      trailing: Icon(Icons.delete, color: Colors.red),
     );
   }
 }

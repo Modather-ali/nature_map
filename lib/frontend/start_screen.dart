@@ -3,12 +3,21 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:nature_map/app_theme.dart';
 import 'package:nature_map/frontend/landscapes_list.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:nature_map/frontend/search_screen.dart';
 import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+List<String> imagesUrl = [
+  "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fmountain.jpg?alt=media&token=b5297161-f840-4f61-bcc9-5b4df8f99ba4",
+  "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fsea.jpg?alt=media&token=f8d85523-ed4b-42f0-90f5-691ad7295500",
+  "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fdesert.jpg?alt=media&token=76592b04-d120-4285-b209-11ddf16062a3",
+  "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fvolcano.jpg?alt=media&token=958fb88b-66f9-49bc-be6f-df384caf2cea",
+  "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fforest.jpg?alt=media&token=8a9e9332-7a44-4c05-9917-08ad89e6ba66",
+  "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fcivilization.jpg?alt=media&token=46f133d0-3b86-4435-92d5-aa2367f65ae4",
+];
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -46,8 +55,13 @@ class _StartScreenState extends State<StartScreen> {
     }
   }
 
+  FirebaseMessaging firmes = FirebaseMessaging.instance;
+
   @override
   void initState() {
+    firmes.getToken().then((token) {
+      debugPrint("MY TOKEN: $token");
+    });
     _checkConnectivity();
     _getLandscapesDate();
     super.initState();

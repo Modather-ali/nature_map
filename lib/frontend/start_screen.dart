@@ -9,6 +9,7 @@ import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 
 List<String> imagesUrl = [
   "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fmountain.jpg?alt=media&token=b5297161-f840-4f61-bcc9-5b4df8f99ba4",

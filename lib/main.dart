@@ -10,9 +10,9 @@ import 'package:nature_map/frontend/side_screens/user_favorite.dart';
 import 'package:nature_map/frontend/side_screens/user_profile.dart';
 import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
+import 'package:nature_map/introduction_screens.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
-import 'package:nature_map/test.dart';
 import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: appTheme(),
-        home: OnBoardingPage(),
+        home: IntroScreen(),
       ),
     );
   }

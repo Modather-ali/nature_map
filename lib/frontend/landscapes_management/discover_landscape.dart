@@ -25,7 +25,8 @@ class AddLandscape extends StatefulWidget {
 }
 
 class _AddLandscapeState extends State<AddLandscape> {
-  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _aboutController = TextEditingController();
   final GlobalKey<FormState> _textKey = GlobalKey<FormState>();
 
   bool isLoading = false;
@@ -125,14 +126,30 @@ class _AddLandscapeState extends State<AddLandscape> {
                   }
                   return null;
                 },
-                controller: _textEditingController,
+                controller: _nameController,
                 maxLength: 20,
                 decoration: InputDecoration(
                   focusedBorder: const OutlineInputBorder(),
                   enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(width: 0.3, color: Colors.grey),
                   ),
-                  hintText: "Press here...",
+                  hintText: "Landscpe name",
+                  hintStyle: appTheme().textTheme.headline4,
+                ),
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              TextFormField(
+                controller: _aboutController,
+                maxLength: 300,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  focusedBorder: const OutlineInputBorder(),
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(width: 0.3, color: Colors.grey),
+                  ),
+                  hintText: "About this Landscape",
                   hintStyle: appTheme().textTheme.headline4,
                 ),
               ),
@@ -305,7 +322,7 @@ class _AddLandscapeState extends State<AddLandscape> {
                     ],
                   )
               ],
-              //  _selectImages(landImages: landImages),
+              _selectImages(landImages: landImages),
             ],
           ),
         ),
@@ -475,14 +492,16 @@ class _AddLandscapeState extends State<AddLandscape> {
           ),
           ElevatedButton(
               onPressed: () async {
-                if (_textEditingController.text.isNotEmpty) {
+                if (_nameController.text.isNotEmpty) {
                   if (providerValue.landImagesList.isNotEmpty) {
                     if (providerValue.landTags.isNotEmpty) {
                       setState(() {
                         isLoading = true;
                       });
                       try {
-                        providerValue.landName = _textEditingController.text;
+                        providerValue.landName = _nameController.text;
+                        providerValue.aboutLand = _aboutController.text;
+
                         await providerValue.addNewLandToFirebase();
                         providerValue.lat = 0.0;
                         providerValue.long = 0.0;

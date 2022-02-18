@@ -10,7 +10,6 @@ import 'package:nature_map/frontend/side_screens/user_favorite.dart';
 import 'package:nature_map/frontend/side_screens/user_profile.dart';
 import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
-import 'package:nature_map/introduction_screens.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: appTheme(),
-        home: IntroScreen(),
+        home: const HomePage(),
       ),
     );
   }
@@ -99,7 +98,7 @@ class _HomePageState extends State<HomePage> {
     return ZoomDrawer(
       //  controller: _drawerController,
       menuScreen: MenuScreen(),
-      mainScreen: const StartScreen(),
+      mainScreen: StartScreen(),
       borderRadius: 24.0,
       showShadow: true,
       angle: 0.0,

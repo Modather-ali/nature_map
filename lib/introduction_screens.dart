@@ -31,9 +31,9 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
       bodyTextStyle: GoogleFonts.ibmPlexMono(
         textStyle: const TextStyle(
-          color: Colors.black,
+          color: Colors.white,
           fontSize: 18,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w800,
         ),
       ),
       bodyPadding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
@@ -88,7 +88,7 @@ class _IntroScreenState extends State<IntroScreen> {
           decoration: pageDecoration.copyWith(
             pageColor: Colors.transparent,
             fullScreen: true,
-            titlePadding: const EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 1.0),
+            descriptionPadding: const EdgeInsets.fromLTRB(5.0, 30.0, 0.0, 1.0),
             imagePadding: EdgeInsets.zero,
             bodyFlex: 2,
             imageFlex: 4,
@@ -97,11 +97,52 @@ class _IntroScreenState extends State<IntroScreen> {
           ),
         ),
         PageViewModel(
-          title: "Share and enjoy",
+          title: "",
           body:
               "Enjoy sharing your Knowledge about the landscapes you have visited, and are to visit, with Nature Map community",
-          image: Image.asset('assets/images/mountain.jpg'),
-          decoration: pageDecoration,
+          image: Container(
+            alignment: Alignment.topCenter,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFa68a64),
+                  Color(0xFFb08968),
+                  Color(0xFFb08968),
+                  Color(0xFF936639),
+                  Color(0xFF7f4f24),
+                  Color(0xFF582f0e),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomRight,
+              ),
+              // color: Colors.brown,
+            ),
+            child: Stack(
+              alignment: Alignment.bottomLeft,
+              children: [
+                Image.asset('assets/images/image2.jpg'),
+                Text(
+                  " Share and enjoy ",
+                  style: appTheme()
+                      .textTheme
+                      .headline3!
+                      .copyWith(fontSize: 20, backgroundColor: Colors.white),
+                ),
+              ],
+            ),
+          ),
+          decoration: pageDecoration.copyWith(
+            pageColor: Colors.transparent,
+            fullScreen: true,
+            descriptionPadding:
+                const EdgeInsets.fromLTRB(5.0, 00.0, 0.0, 100.0),
+            imagePadding: EdgeInsets.zero,
+            bodyFlex: 2,
+            imageFlex: 4,
+            bodyAlignment: Alignment.bottomRight,
+            imageAlignment: Alignment.topCenter,
+          ),
         ),
         PageViewModel(
           title: "Start now, the adventure is waiting for you",

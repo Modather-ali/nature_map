@@ -12,6 +12,7 @@ class LandscapeProvider extends ChangeNotifier {
   double long = 0;
 
   String landName = '';
+  String aboutLand = '';
 
   List<File> landImagesList = [];
   List<String> landTags = [];
@@ -22,6 +23,7 @@ class LandscapeProvider extends ChangeNotifier {
 
     await _firebaseDatabase.addNewLandToFirebase(
         userEmail: FirebaseAuth.instance.currentUser!.email.toString(),
+        aboutLand: aboutLand,
         landName: landName,
         tags: landTags,
         landImagesLink: _landImagesLink,

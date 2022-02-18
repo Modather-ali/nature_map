@@ -190,8 +190,10 @@ class _StartScreenState extends State<StartScreen> {
             children: [
               IconButton(
                 color: Colors.white,
-                onPressed: () {
-                  ZoomDrawer.of(context)?.open();
+                onPressed: () async {
+                  bool? isOpen = ZoomDrawer.of(context)?.isOpen();
+                  await ZoomDrawer.of(context)?.open();
+                  debugPrint("is open: $isOpen");
                 },
                 icon: const Icon(Icons.menu),
               ),

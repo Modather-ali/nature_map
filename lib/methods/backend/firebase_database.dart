@@ -79,6 +79,7 @@ class FirebaseDatabase {
   addNewLandToFirebase({
     required String userEmail,
     required String landName,
+    required String aboutLand,
     required List<String> tags,
     required List<String> landImagesLink,
     required double lat,
@@ -93,6 +94,7 @@ class FirebaseDatabase {
       documentReference.set({
         "added_by": userEmail,
         "land_name": landName,
+        "about_land": aboutLand,
         "lat": lat,
         "long": long,
         "land_images": landImagesLink,

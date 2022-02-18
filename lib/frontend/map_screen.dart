@@ -208,6 +208,13 @@ class _MapScreenState extends State<MapScreen> {
             const SizedBox(
               height: 10,
             ),
+            Text(
+              "About:\n ${widget.landscapeData['about_land']}",
+              style: appTheme().textTheme.headline4,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             Row(
               children: [
                 Text(

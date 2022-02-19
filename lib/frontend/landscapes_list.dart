@@ -188,7 +188,7 @@ class _LandscapesListState extends State<LandscapesList>
 
     return Card(
       margin: const EdgeInsets.all(10.0),
-      elevation: 16,
+      elevation: 6,
       child: SizedBox(
         height: MediaQuery.of(context).orientation == Orientation.landscape
             ? MediaQuery.of(context).size.height * 0.7
@@ -197,7 +197,7 @@ class _LandscapesListState extends State<LandscapesList>
           children: [
             OpenContainer(
               transitionDuration: const Duration(milliseconds: 650),
-              closedElevation: 8,
+              closedElevation: 0.0,
               transitionType: ContainerTransitionType.fade,
               closedBuilder: (context, closedBuilder) {
                 return Row(

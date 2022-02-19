@@ -58,23 +58,23 @@ class _AboutAppState extends State<AboutApp> {
             ),
           ),
           const Divider(),
-          ListTile(
-            onTap: () {},
-            leading: const Icon(
-              Icons.star,
-              color: Colors.orange,
-              size: 30,
-            ),
-            title: Text(
-              "Rate us ",
-              style: appTheme().textTheme.headline4,
-            ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: Colors.black,
-              size: 20,
-            ),
-          )
+          // ListTile(
+          //   onTap: () {},
+          //   leading: const Icon(
+          //     Icons.star,
+          //     color: Colors.orange,
+          //     size: 30,
+          //   ),
+          //   title: Text(
+          //     "Rate us ",
+          //     style: appTheme().textTheme.headline4,
+          //   ),
+          //   trailing: const Icon(
+          //     Icons.arrow_forward_ios_rounded,
+          //     color: Colors.black,
+          //     size: 20,
+          //   ),
+          // )
         ],
       ),
     );

@@ -230,15 +230,18 @@ class _StartScreenState extends State<StartScreen> {
       required Color color}) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
+        Navigator.of(context).push(
+          MaterialPageRoute(
             builder: (context) => LandscapesList(
-                  landscapeName: landscapeName,
-                  color: color,
-                )));
+              landscapeName: landscapeName,
+              color: color,
+            ),
+          ),
+        );
       },
       child: Container(
         height: MediaQuery.of(context).orientation == Orientation.landscape
-            ? MediaQuery.of(context).size.height / 4
+            ? MediaQuery.of(context).size.height / 2.5
             : MediaQuery.of(context).size.height / 7,
         width: MediaQuery.of(context).size.width / 2.2,
         decoration: BoxDecoration(

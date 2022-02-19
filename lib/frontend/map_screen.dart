@@ -35,7 +35,7 @@ class _MapScreenState extends State<MapScreen> {
   _getDate() async {
     if (user != null) {
       _userData = await _firebaseDatabase.getUserData(
-          userEmail: widget.landscapeData["added by"]);
+          userEmail: widget.landscapeData["added_by"]);
     }
 
     setState(() {});
@@ -226,7 +226,7 @@ class _MapScreenState extends State<MapScreen> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => UserProfile(
-                            userEmail: widget.landscapeData['added by'],
+                            userEmail: widget.landscapeData['added_by'],
                           ),
                         ),
                       );

@@ -153,7 +153,7 @@ class FirebaseDatabase {
       CollectionReference collectionReference =
           FirebaseFirestore.instance.collection(landsCollectionPath);
       QuerySnapshot<Object?> querySnapshotn = await collectionReference
-          .where("added by", isEqualTo: userEmail)
+          .where("added_by", isEqualTo: userEmail)
           .get();
       return querySnapshotn.docs;
     } catch (e) {

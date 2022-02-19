@@ -11,6 +11,7 @@ import 'package:nature_map/frontend/side_screens/user_profile.dart';
 import 'package:nature_map/frontend/start_screen.dart';
 import 'package:nature_map/frontend/ui_widgets/snack_bar.dart';
 import 'package:nature_map/methods/backend/auth_methods/google_sign_in.dart';
+import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -111,19 +112,43 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class MenuScreen extends StatelessWidget {
+class MenuScreen extends StatefulWidget {
   MenuScreen({Key? key}) : super(key: key);
-  _getProfileImage() {
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  final FirebaseDatabase _firebaseDatabase = FirebaseDatabase();
+
+  final RoundedLoadingButtonController _roundedLoadingButtonController =
+      RoundedLoadingButtonController();
+
+  Map<String, dynamic> _userData = {};
+
+  String userEmail = FirebaseAuth.instance.currentUser!.email.toString();
+
+  _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
-      return NetworkImage(
-          FirebaseAuth.instance.currentUser!.photoURL.toString());
+      _userData = await _firebaseDatabase.getUserData(userEmail: userEmail);
+      setState(() {});
+    }
+  }
+
+  _getProfileImage() {
+    if (_userData.isNotEmpty) {
+      return NetworkImage(_userData["profile_image_link"].toString());
     } else {
       return const AssetImage("assets/images/profile_avatar.png");
     }
   }
 
-  final RoundedLoadingButtonController _roundedLoadingButtonController =
-      RoundedLoadingButtonController();
+  @override
+  void initState() {
+    _getUserData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

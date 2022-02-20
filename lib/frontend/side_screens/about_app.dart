@@ -43,7 +43,7 @@ class _AboutAppState extends State<AboutApp> {
           ),
           ListTile(
             leading: Image.asset(
-              "assets/images/forest.jpg",
+              "assets/images/app_icon.png",
               fit: BoxFit.contain,
             ),
             title: Text(

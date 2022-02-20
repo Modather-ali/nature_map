@@ -7,9 +7,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     
    <application
-        android:label="nature_map"
+        android:label="Nature Map"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyDEbonPdi7tbY5xB3uRVAA7SMPMHyvQDcg"/>
         <activity

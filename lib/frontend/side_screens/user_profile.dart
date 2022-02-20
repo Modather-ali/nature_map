@@ -175,7 +175,7 @@ class _UserProfileState extends State<UserProfile> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: MediaQuery.of(context).size.width * 0.6,
+                width: MediaQuery.of(context).size.width * 0.5,
                 child: TimerBuilder.periodic(
                   const Duration(seconds: 1),
                   builder: (context) {

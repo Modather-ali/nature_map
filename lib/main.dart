@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'Nature Map',
         theme: appTheme(),
         home: const HomePage(),
       ),
@@ -127,10 +127,11 @@ class _MenuScreenState extends State<MenuScreen> {
 
   Map<String, dynamic> _userData = {};
 
-  String userEmail = FirebaseAuth.instance.currentUser!.email.toString();
+  String userEmail = '';
 
   _getUserData() async {
     if (FirebaseAuth.instance.currentUser != null) {
+      userEmail = FirebaseAuth.instance.currentUser!.email.toString();
       _userData = await _firebaseDatabase.getUserData(userEmail: userEmail);
       setState(() {});
     }

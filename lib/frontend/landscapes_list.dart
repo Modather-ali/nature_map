@@ -41,6 +41,9 @@ class _LandscapesListState extends State<LandscapesList>
   // late AnimationController _animationController;
 
   // bool isListView = true;
+  Future<List<Placemark>> _getPlacemark(latitude, longitude) async {
+    return await placemarkFromCoordinates(latitude, longitude);
+  }
 
   _getDate() async {
     _landscapesDataList = await _firebaseDatabase.getLandscapesData(
@@ -183,6 +186,8 @@ class _LandscapesListState extends State<LandscapesList>
     required int index,
     required QueryDocumentSnapshot<Object?> landscapeData,
   }) {
+    // List<Placemark> _placemark =
+    //     _getPlacemark(landscapeData["lat"], landscapeData["long"]);
     _distanceBetween = Geolocator.distanceBetween(_position.latitude,
         _position.longitude, landscapeData["lat"], landscapeData["long"]);
 
@@ -202,59 +207,68 @@ class _LandscapesListState extends State<LandscapesList>
               closedBuilder: (context, closedBuilder) {
                 return Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.topCenter,
-                        margin:
-                            const EdgeInsets.only(left: 3, top: 45, right: 5),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).orientation ==
-                                  Orientation.landscape
-                              ? MediaQuery.of(context).size.height * 0.4
-                              : MediaQuery.of(context).size.height / 7,
-                          width: MediaQuery.of(context).orientation ==
-                                  Orientation.landscape
-                              ? MediaQuery.of(context).size.width * 0.5
-                              : MediaQuery.of(context).size.width / 4,
-                          child: Image.network(
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Container(
+                      height: MediaQuery.of(context).orientation ==
+                              Orientation.landscape
+                          ? MediaQuery.of(context).size.height * 0.4
+                          : MediaQuery.of(context).size.height / 7,
+                      width: MediaQuery.of(context).orientation ==
+                              Orientation.landscape
+                          ? MediaQuery.of(context).size.width * 0.5
+                          : MediaQuery.of(context).size.width * 0.3,
+                      alignment: Alignment.topCenter,
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 35, right: 25),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(
                             landscapeData["land_images"][0],
-                            fit: BoxFit.fill,
                           ),
+                          fit: BoxFit.fill,
                         ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.65,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            landscapeData["land_name"].toString(),
-                            style: appTheme().textTheme.headline3,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "country / area",
-                            style: appTheme().textTheme.headline4,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "$_distanceBetween".split(".")[0] +
-                                "." +
-                                "$_distanceBetween".split(".")[0][0] +
-                                " meters\nfar away",
-                            style: appTheme().textTheme.headline4,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          _tagsCard(landscapeData["tages"]),
-                        ],
+                      width: 15,
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.65,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              landscapeData["land_name"].toString(),
+                              style: appTheme().textTheme.headline3,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            // Text(
+                            //   "${_placemark[0].country} / ${_placemark[0].locality}",
+                            //   style: appTheme().textTheme.headline4,
+                            // ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "$_distanceBetween".split(".")[0] +
+                                  "." +
+                                  "$_distanceBetween".split(".")[0][0] +
+                                  " meters\nfar away",
+                              style: appTheme().textTheme.headline4,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            _tagsCard(landscapeData["tages"]),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -320,76 +334,77 @@ class _LandscapesListState extends State<LandscapesList>
     int index = 0,
   }) {
     return Consumer<DifferentLandsapesValus>(
-        builder: (context, providerValue, chlid) {
-      if (_userData.isNotEmpty) {
-        providerValue.isFan =
-            _userData["favorite_landscapes"].contains(landscapeData.id);
-      }
-      providerValue.fansNumber = landscapeData["fans"].length;
+      builder: (context, providerValue, chlid) {
+        if (_userData.isNotEmpty) {
+          providerValue.isFan =
+              _userData["favorite_landscapes"].contains(landscapeData.id);
+        }
+        providerValue.fansNumber = landscapeData["fans"].length;
 
-      return Stack(
-        children: [
-          Row(
-            children: [
-              _isLoading[index]
-                  ? const SizedBox(
-                      height: 50.0,
-                      child: LoadingIndicator(
-                        indicatorType: Indicator.ballScale,
-                        colors: kDefaultRainbowColors,
-                        strokeWidth: 4.0,
-                      ),
-                    )
-                  : IconButton(
-                      onPressed: () async {
-                        if (user != null) {
-                          setState(() {
-                            _isLoading[index] = true;
-                          });
-                          try {
-                            await _firebaseDatabase
-                                .updateUserFavoriteLandscapes(
-                                    userEmail: FirebaseAuth
-                                        .instance.currentUser!.email
-                                        .toString(),
-                                    landscape: landscapeData);
-                            await _firebaseDatabase.updateLandscapesFans(
-                                userEmail: FirebaseAuth
-                                    .instance.currentUser!.email
-                                    .toString(),
-                                landscape: landscapeData);
-                            await _getDate();
-                          } catch (e) {
-                            debugPrint("Error while update fans: $e");
+        return Stack(
+          children: [
+            Row(
+              children: [
+                _isLoading[index]
+                    ? const SizedBox(
+                        height: 50.0,
+                        child: LoadingIndicator(
+                          indicatorType: Indicator.ballScale,
+                          colors: kDefaultRainbowColors,
+                          strokeWidth: 4.0,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: () async {
+                          if (user != null) {
+                            setState(() {
+                              _isLoading[index] = true;
+                            });
+                            try {
+                              await _firebaseDatabase
+                                  .updateUserFavoriteLandscapes(
+                                      userEmail: FirebaseAuth
+                                          .instance.currentUser!.email
+                                          .toString(),
+                                      landscape: landscapeData);
+                              await _firebaseDatabase.updateLandscapesFans(
+                                  userEmail: FirebaseAuth
+                                      .instance.currentUser!.email
+                                      .toString(),
+                                  landscape: landscapeData);
+                              await _getDate();
+                            } catch (e) {
+                              debugPrint("Error while update fans: $e");
+                            }
+
+                            setState(() {
+                              _isLoading[index] = false;
+                              providerValue.isFan = !providerValue.isFan;
+                            });
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar(
+                                message: "Error you are not registered",
+                                color: Colors.red));
                           }
-
-                          setState(() {
-                            _isLoading[index] = false;
-                            providerValue.isFan = !providerValue.isFan;
-                          });
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar(
-                              message: "Error you are not registered",
-                              color: Colors.red));
-                        }
-                      },
-                      icon: Icon(
-                        providerValue.isFan
-                            ? Icons.favorite
-                            : Icons.favorite_border_outlined,
-                        color: providerValue.isFan ? Colors.red : Colors.grey,
+                        },
+                        icon: Icon(
+                          providerValue.isFan
+                              ? Icons.favorite
+                              : Icons.favorite_border_outlined,
+                          color: providerValue.isFan ? Colors.red : Colors.grey,
+                        ),
                       ),
-                    ),
-              Text(
-                providerValue.fansNumber.toString(),
-                style: appTheme().textTheme.headline4!.copyWith(
-                      color: providerValue.isFan ? Colors.red : Colors.black,
-                    ),
-              ),
-            ],
-          ),
-        ],
-      );
-    });
+                Text(
+                  providerValue.fansNumber.toString(),
+                  style: appTheme().textTheme.headline4!.copyWith(
+                        color: providerValue.isFan ? Colors.red : Colors.black,
+                      ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 }

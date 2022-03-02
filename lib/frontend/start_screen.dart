@@ -9,7 +9,6 @@ import 'package:nature_map/methods/backend/firebase_database.dart';
 import 'package:nature_map/methods/state_management/provider_methods.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:introduction_screen/introduction_screen.dart';
 
 List<String> imagesUrl = [
   "https://firebasestorage.googleapis.com/v0/b/nature-map-53e8a.appspot.com/o/start_screen_images%2Fmountain.jpg?alt=media&token=b5297161-f840-4f61-bcc9-5b4df8f99ba4",
@@ -133,12 +132,12 @@ class _StartScreenState extends State<StartScreen> {
                 children: [
                   _landscapeButton(
                       context: context,
-                      imagePath: "assets/images/mountain.jpg",
+                      imagePath: imagesUrl[0],
                       landscapeName: ["Mountain"],
                       color: const Color(0xFF7f4f24)),
                   _landscapeButton(
                     context: context,
-                    imagePath: "assets/images/sea.jpg",
+                    imagePath: imagesUrl[1],
                     landscapeName: ["Sea"],
                     color: const Color(0xFF014f86),
                   ),
@@ -152,12 +151,12 @@ class _StartScreenState extends State<StartScreen> {
                 children: [
                   _landscapeButton(
                       context: context,
-                      imagePath: "assets/images/desert.jpg",
+                      imagePath: imagesUrl[2],
                       landscapeName: ["Desert"],
                       color: const Color(0xFFffba08)),
                   _landscapeButton(
                     context: context,
-                    imagePath: "assets/images/volcano.jpg",
+                    imagePath: imagesUrl[3],
                     landscapeName: ["Volcano"],
                     color: const Color(0xFFae2012),
                   ),
@@ -171,13 +170,13 @@ class _StartScreenState extends State<StartScreen> {
                 children: [
                   _landscapeButton(
                     context: context,
-                    imagePath: "assets/images/forest.jpg",
+                    imagePath: imagesUrl[4],
                     landscapeName: ["Forest"],
                     color: const Color(0xFF2d6a4f),
                   ),
                   _landscapeButton(
                     context: context,
-                    imagePath: "assets/images/civilization.jpg",
+                    imagePath: imagesUrl[5],
                     landscapeName: ["Civilization"],
                     color: const Color(0xFF7b2cbf),
                   ),
@@ -260,7 +259,7 @@ class _StartScreenState extends State<StartScreen> {
               )
             ],
             image: DecorationImage(
-                image: AssetImage(imagePath), fit: BoxFit.fill)),
+                image: NetworkImage(imagePath), fit: BoxFit.fill)),
         child: Stack(
           alignment: Alignment.center,
           children: [
